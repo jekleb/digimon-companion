@@ -1,0 +1,504 @@
+{
+  "cap_tiers": [
+    100,
+    250,
+    500,
+    750
+  ],
+  "curve": [
+    {
+      "up_to_level": 100,
+      "coefficient": 5000,
+      "power": 2
+    },
+    {
+      "up_to_level": 250,
+      "coefficient": 15000,
+      "power": 2
+    },
+    {
+      "up_to_level": 500,
+      "coefficient": 26000,
+      "power": 2
+    },
+    {
+      "up_to_level": 750,
+      "coefficient": 40000,
+      "power": 2
+    }
+  ],
+  "stages": [
+    {
+      "min": 0,
+      "max": 0,
+      "stage": "Egg",
+      "name": "Digitama",
+      "emoji": "\ud83e\udd5a",
+      "tagline": "Dormant. Waiting for its first tokens.",
+      "art": [
+        "   .-\"\"\"\"-.",
+        "  /        \\",
+        " (          )",
+        " (          )",
+        "  \\        /",
+        "   '-....-'"
+      ],
+      "sprite": [
+        "....KKKK....",
+        "..KKwwwwKK..",
+        ".KwwWWwwwwK.",
+        ".KwWwwwccwK.",
+        "KwwwwwwwwccK",
+        "KwcwwwwwwwwK",
+        "KwwwwccwwwwK",
+        "KwwwwccwwwwK",
+        ".KwcwwwwwwK.",
+        ".KwwwwwccwK.",
+        "..KKwwwwKK..",
+        "....KKKK...."
+      ]
+    },
+    {
+      "min": 1,
+      "max": 5,
+      "stage": "Baby I",
+      "name": "Bitmon",
+      "emoji": "\ud83d\udd39",
+      "tagline": "A flicker of logic gates blinking awake.",
+      "art": [
+        "    .-\"\"-.",
+        "   ( o  o )",
+        "    \\ vv /",
+        "     '--'"
+      ],
+      "sprite": [
+        "............",
+        "............",
+        "...KKKKKK...",
+        "..KccccccK..",
+        ".KccccccccK.",
+        ".KcKcccKccK.",
+        ".KckccckccK.",
+        ".KcccccccK..",
+        "..KcceeccK..",
+        "...KKccKK...",
+        ".....KK.....",
+        "............"
+      ]
+    },
+    {
+      "min": 6,
+      "max": 15,
+      "stage": "Baby II",
+      "name": "Bytemon",
+      "emoji": "\ud83d\udca0",
+      "tagline": "Small, quick, endlessly curious.",
+      "art": [
+        "    .-\"\"\"\"-.",
+        "   /  ^  ^  \\",
+        "  (  '----'  )",
+        "   \\ 01  10 /",
+        "    '-....-'"
+      ],
+      "sprite": [
+        "............",
+        "...KKKKKK...",
+        "..KccccccK..",
+        ".KcCcccCccK.",
+        ".KcKcccKccK.",
+        ".KckccckccK.",
+        "KccccccccccK",
+        "KcCcggggcCcK",
+        "KccceeeecccK",
+        ".KcccccccK..",
+        "..KKKKKKK...",
+        "..K......K.."
+      ]
+    },
+    {
+      "min": 16,
+      "max": 30,
+      "stage": "Rookie",
+      "name": "Cachemon",
+      "emoji": "\u26a1",
+      "tagline": "Fast learner. Starting to hold its shape.",
+      "art": [
+        "     /\\_/\\",
+        "    ( o.o )",
+        "   ---(   )---",
+        "    /|     |\\",
+        "   ^        ^"
+      ],
+      "sprite": [
+        "..K......K..",
+        "..Ky....yK..",
+        ".Kyyk..kyyK.",
+        ".KyyyyyyyyK.",
+        "KyyKyyyKyyyK",
+        "KyykyyykyyyK",
+        "KyyyyyyyyyyK",
+        "KycyyeeyycyK",
+        ".KyyyyyyyyK.",
+        "..KyyyyyyK..",
+        "...K.yy.K...",
+        "...K.KK.K..."
+      ]
+    },
+    {
+      "min": 31,
+      "max": 55,
+      "stage": "Champion",
+      "name": "Tensormon",
+      "emoji": "\ud83d\udd37",
+      "tagline": "Muscled up on real workloads.",
+      "art": [
+        "       ___",
+        "     /|   |\\",
+        "    / | # | \\",
+        "   |  |___|  |",
+        "   |  /   \\  |",
+        "   | /     \\ |",
+        "    \\_______/",
+        "    //     \\\\"
+      ],
+      "sprite": [
+        "...K....K...",
+        "..KCK..KCK..",
+        ".KCCCCCCCCK.",
+        ".KCCkCCkCCK.",
+        "KCCCCCCCCCCK",
+        "KCsCCeeCCsCK",
+        "KCCCsSSsCCCK",
+        "KCCSssssSCCK",
+        ".KCCSSSSCCK.",
+        ".KCC.KK.CCK.",
+        ".KK..CC..KK.",
+        ".....KK....."
+      ]
+    },
+    {
+      "min": 56,
+      "max": 80,
+      "stage": "Ultimate",
+      "name": "Gradientmon",
+      "emoji": "\ud83c\udf00",
+      "tagline": "Converging fast, hard to keep up with.",
+      "art": [
+        "      .--~~--.",
+        "     /  o  o  \\",
+        "   _/   ----   \\_",
+        "  /  |        |  \\",
+        " (   |   ~~   |   )",
+        "  \\_ |________| _/",
+        "    \\\\        //",
+        "     \\\\      //"
+      ],
+      "sprite": [
+        "...KKKKKK...",
+        ".KKpppbbbKK.",
+        "KppppbbbbBBK",
+        "KpppmmeebbBK",
+        "KpmmmeebbBBK",
+        "KppmmeebbbBK",
+        "KBppmmbbBBBK",
+        "KBBpppbbBmBK",
+        ".KBBpbbBBBK.",
+        "..KBBpbBBK..",
+        "...KKBBKK...",
+        ".....KK....."
+      ]
+    },
+    {
+      "min": 81,
+      "max": 100,
+      "stage": "Mega",
+      "name": "Paramon",
+      "emoji": "\ud83d\udd36",
+      "tagline": "Peak of the first cap. A serious grind to reach.",
+      "art": [
+        "        [ * ]",
+        "       /=====\\",
+        "      | ##### |",
+        "     /|  ###  |\\",
+        "    (  |_____| )",
+        "     \\\\  | |  //",
+        "      \\\\_|_|_//",
+        "       [[###]]"
+      ],
+      "sprite": [
+        "..K.KKKK.K..",
+        "..KooooooK..",
+        ".KooyooyooK.",
+        ".KoyyooyyoK.",
+        "KooooooooooK",
+        "KoyoeeeeoyoK",
+        "KooyooooyooK",
+        "KGGoooooGGoK",
+        ".KooyGGyooK.",
+        ".KKoooooKK..",
+        "..KK.oo.KK..",
+        "...K.KK.K..."
+      ]
+    },
+    {
+      "min": 101,
+      "max": 150,
+      "stage": "Mega Burst",
+      "name": "Singularimon",
+      "emoji": "\ud83c\udf1f",
+      "tagline": "Broke the first cap. Rules are different now.",
+      "art": [
+        "     \\   |   /",
+        "      \\  |  /",
+        "   ----[ O ]----",
+        "      /  |  \\",
+        "     /   |   \\",
+        "    <    |    >",
+        "     \\___|___/"
+      ],
+      "sprite": [
+        ".....G......",
+        "..G..G..G...",
+        "...GGyyGG...",
+        "..GyyGGyyG..",
+        "GGyyGeeGyyGG",
+        ".GGyyGGyyGG.",
+        "..GyyGGyyG..",
+        "..GGyGGyGG..",
+        ".G.GyyGG.G..",
+        "G...GGGG...G",
+        "....G..G....",
+        "...G....G..."
+      ]
+    },
+    {
+      "min": 151,
+      "max": 250,
+      "stage": "Ultra",
+      "name": "Archimon",
+      "emoji": "\ud83d\udc51",
+      "tagline": "Commands respect. Very few get here.",
+      "art": [
+        "       .-^^-.",
+        "      / ##### \\",
+        "     |  #===#  |",
+        "     |  # O #  |",
+        "     |  #===#  |",
+        "      \\_______/",
+        "      //|   |\\\\",
+        "     // |   | \\\\",
+        "    ^^  ^     ^ ^^"
+      ],
+      "sprite": [
+        "..G.GG.G.G..",
+        "..GyGyGyGy..",
+        "...KGGGGK...",
+        "..KwWWWWwK..",
+        ".KwWyGGyWwK.",
+        ".KwyeeeeywK.",
+        ".KwWyGGyWwK.",
+        "KwwWWWWWWwwK",
+        "KwGWWWWWWGwK",
+        ".KwwWWWWwwK.",
+        "..KKwGGwKK..",
+        "...K.KK.K..."
+      ]
+    },
+    {
+      "min": 251,
+      "max": 375,
+      "stage": "Awakened",
+      "name": "Genesimon",
+      "emoji": "\u2728",
+      "tagline": "Beyond the second cap. Legendary territory.",
+      "art": [
+        "    *  .  +  .  *",
+        "   ` .-'|||'-. `",
+        "    \\  #####  /",
+        "   --|  ooo  |--",
+        "    /  #####  \\",
+        "   ` .-'|||'-. `",
+        "      /_____\\"
+      ],
+      "sprite": [
+        "....W..W....",
+        "..W.WppW.W..",
+        "...WppppW...",
+        "W.WpmWWmpW.W",
+        ".WppWeeWppW.",
+        "WpmWppppWmpW",
+        ".WppWeeWppW.",
+        "W.WpmWWmpW.W",
+        "...WppppW...",
+        "..W.WppW.W..",
+        "....W..W....",
+        "...W....W..."
+      ]
+    },
+    {
+      "min": 376,
+      "max": 500,
+      "stage": "Sovereign",
+      "name": "Omniloadmon",
+      "emoji": "\ud83c\udf0c",
+      "tagline": "The current ceiling. Max stats, max respect.",
+      "art": [
+        "   =============",
+        "  //  * CROWN * \\\\",
+        " ||  #=========#  ||",
+        " ||  #   O=O   #  ||",
+        " ||  #=========#  ||",
+        "  \\\\_____________//",
+        "    //|  +++  |\\\\",
+        "   // |_______| \\\\",
+        "  ^^  ^       ^  ^^"
+      ],
+      "sprite": [
+        "..G.GGGG.G..",
+        ".GyGGBBGGyG.",
+        "..KBBBBBBK..",
+        ".KBbbppbbBK.",
+        "KBbpGGGGpbBK",
+        "KBbpGeeGpbBK",
+        "KBbppGGppbBK",
+        "KBBbbppbbBBK",
+        ".KBBbppbBBK.",
+        ".GKKBBBBKKG.",
+        "GyG.KGGK.GyG",
+        "..G..KK..G.."
+      ]
+    },
+    {
+      "min": 501,
+      "max": 550,
+      "stage": "Celestial",
+      "name": "Celestimon",
+      "emoji": "\u2604\ufe0f",
+      "tagline": "Past the Sovereign ceiling \u2014 burning brighter than the cap allowed.",
+      "sprite": [
+        "....GGGG....",
+        "..GGyooyGG..",
+        ".GyorWWroyG.",
+        ".GorWeeWroG.",
+        "GyorWkkWroyG",
+        "GyorWWWWroyG",
+        ".GorWeeWroG.",
+        ".GyorWWroyG.",
+        "..GGyooyGG..",
+        "...oo..oo...",
+        "..o......o..",
+        ".o........o."
+      ]
+    },
+    {
+      "min": 551,
+      "max": 600,
+      "stage": "Astral",
+      "name": "Astramon",
+      "emoji": "\ud83e\ude90",
+      "tagline": "Orbiting laws of its own making.",
+      "sprite": [
+        "....pppp....",
+        "..pppppppp..",
+        ".pbbppppbbp.",
+        "GpbbbeebbbpG",
+        "GGpbbeebbpGG",
+        "GpbbbppbbbpG",
+        ".pppppppppp.",
+        "..pbbppbbp..",
+        "...pp..pp...",
+        "..G......G..",
+        ".G........G.",
+        "G..........G"
+      ]
+    },
+    {
+      "min": 601,
+      "max": 650,
+      "stage": "Pulsar",
+      "name": "Pulsarmon",
+      "emoji": "\ud83d\udcab",
+      "tagline": "Pulsing with borrowed starlight.",
+      "sprite": [
+        ".....cc.....",
+        "..c..cc..c..",
+        "...c.cc.c...",
+        "....cWWc....",
+        "cc.cWeeWc.cc",
+        "..cWWeeWWc..",
+        "..cWWeeWWc..",
+        "cc.cWWWWc.cc",
+        "....cWWc....",
+        "...c.cc.c...",
+        "..c..cc..c..",
+        ".....cc....."
+      ]
+    },
+    {
+      "min": 651,
+      "max": 700,
+      "stage": "Quasar",
+      "name": "Quasarmon",
+      "emoji": "\ud83c\udf20",
+      "tagline": "The brightest thing for lightyears.",
+      "sprite": [
+        "....mmmm....",
+        "..mmGGGGmm..",
+        ".mGGmmmmGGm.",
+        ".mGmWWWWmGm.",
+        "mGGmWeeWmGGm",
+        "mGGmWeeWmGGm",
+        ".mGmWWWWmGm.",
+        ".mGGmmmmGGm.",
+        "..mmGGGGmm..",
+        "...mm..mm...",
+        "....G..G....",
+        "...G....G..."
+      ]
+    },
+    {
+      "min": 701,
+      "max": 750,
+      "stage": "Aeon",
+      "name": "Aeonmon",
+      "emoji": "\u267e\ufe0f",
+      "tagline": "The new ceiling. Reach it and the cycle begins again.",
+      "sprite": [
+        "..G.GGGG.G..",
+        ".GyGGGGGGyG.",
+        "..GBBBBBBG..",
+        ".GBbppppbBG.",
+        "GBbpGWWGpbBG",
+        "GBbpWeeeWpBG",
+        "GBbpGWWWGpBG",
+        "GBBbbppppbBG",
+        ".GBBbppbBBG.",
+        ".GyKBBBBKyG.",
+        "GyG.KGGK.GyG",
+        "..G..KK..G.."
+      ]
+    }
+  ],
+  "palette": {
+    ".": null,
+    " ": null,
+    "K": "#0b0e17",
+    "k": "#141a2b",
+    "W": "#ffffff",
+    "w": "#dfe7f5",
+    "s": "#8b9bb4",
+    "S": "#3a4a63",
+    "c": "#5fd3ff",
+    "C": "#1a86d6",
+    "b": "#7b7bff",
+    "B": "#4133c9",
+    "g": "#42e29b",
+    "y": "#ffd23f",
+    "o": "#ff8a3d",
+    "r": "#ff5a5f",
+    "m": "#ff6fe0",
+    "p": "#b98bff",
+    "G": "#ffcc33",
+    "e": "#eafcff"
+  }
+}
