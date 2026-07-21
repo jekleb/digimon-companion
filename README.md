@@ -14,6 +14,11 @@ Pure Python standard library. No dependencies. Everything is local — no networ
 no servers, no telemetry.
 
 <p align="center">
+  <img src="demo.gif" alt="Tokimon evolving up the tree, hitting the ceiling, and rebirthing with a shiny recolor" width="540">
+  <br><em>Evolve as you spend tokens → hit the Lv.750 ceiling → rebirth shiny, one prestige higher.</em>
+</p>
+
+<p align="center">
   <img src="preview.svg" alt="Tokimon — the 16-stage 8-bit evolution line, from Digitama to Aeonmon" width="660">
 </p>
 
