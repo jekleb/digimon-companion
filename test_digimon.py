@@ -144,6 +144,34 @@ def test_human_tokens():
     check("human_tokens billions -> B", dl.human_tokens(1_439_054_442) == "1.4B")
     check("human_tokens trillions -> T", dl.human_tokens(2_500_000_000_000) == "2.5T")
     check("human_tokens trims trailing .0", dl.human_tokens(3_000) == "3K")
+    # rounding-boundary promotion: must not render '1000K' / '1000M' / '1000B'
+    check("human_tokens promotes K->M at the boundary", dl.human_tokens(999_950) == "1M")
+    check("human_tokens promotes M->B at the boundary", dl.human_tokens(999_950_000) == "1B")
+    check("human_tokens promotes B->T at the boundary", dl.human_tokens(999_950_000_000) == "1T")
+    check("human_tokens just under a boundary stays put", dl.human_tokens(994_000) == "994K")
+
+
+def test_supports_color_on_a_tty():
+    # Regression guard: supports_color used os.environ without importing os, so it
+    # threw NameError on a real TTY and silently disabled all color rendering.
+    class FakeTTY:
+        def isatty(self):
+            return True
+
+    class NotTTY:
+        def isatty(self):
+            return False
+
+    prev = os.environ.pop("NO_COLOR", None)
+    try:
+        check("supports_color True on a TTY (no NO_COLOR)", sprites.supports_color(FakeTTY()) is True)
+        check("supports_color False on a non-TTY", sprites.supports_color(NotTTY()) is False)
+        os.environ["NO_COLOR"] = "1"
+        check("supports_color respects NO_COLOR", sprites.supports_color(FakeTTY()) is False)
+    finally:
+        os.environ.pop("NO_COLOR", None)
+        if prev is not None:
+            os.environ["NO_COLOR"] = prev
 
 
 def test_agent_style_known_and_unknown():

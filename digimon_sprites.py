@@ -8,6 +8,7 @@ Every renderer takes an explicit `t` (a float, normally time.time()); the frame
 shown is int(t * FPS) % len(frames). Passing the clock in keeps frames pinnable
 in tests and makes the whole layer side-effect free."""
 import colorsys
+import os
 
 import digimon_lib as dl
 

@@ -296,11 +296,17 @@ def human_tokens(n):
     """Compact token count for the one-line status bar: 1,439,054,442 -> '1.4B'.
     Full comma-grouped form (format_int) is still used in the roomier CLI views."""
     n = int(n)
-    for div, suf in ((1_000_000_000_000, "T"), (1_000_000_000, "B"), (1_000_000, "M"), (1_000, "K")):
-        if n >= div:
-            val = f"{n / div:.1f}".rstrip("0").rstrip(".")
-            return f"{val}{suf}"
-    return str(n)
+    if n < 1000:
+        return str(n)
+    # Divide up through the units, promoting to the next unit whenever rounding
+    # to one decimal would spill to 1000 (so 999_950 -> "1M", not "1000K").
+    val = float(n)
+    suffix = ""
+    for suffix in ("K", "M", "B", "T"):
+        val /= 1000
+        if round(val, 1) < 1000:
+            break
+    return f"{val:.1f}".rstrip("0").rstrip(".") + suffix
 
 
 def prestige_symbol(prestige):
