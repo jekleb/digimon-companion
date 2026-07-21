@@ -1,5 +1,9 @@
 # 🥚 Tokimon — an 8-bit token companion for the Claude Code status bar
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)
+![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
+
 A token-fueled virtual pet that lives in your Claude Code **status line**. It
 evolves as you actually spend tokens, springs into a **training animation with
 whatever subagent is running**, and **rebirths** when it hits the level ceiling —
@@ -7,6 +11,10 @@ banking a prestige rank that recolors it and speeds the next climb.
 
 Pure Python standard library. No dependencies. Everything is local — no network,
 no servers, no telemetry.
+
+<p align="center">
+  <img src="preview.svg" alt="Tokimon — the 16-stage 8-bit evolution line, from Digitama to Aeonmon" width="660">
+</p>
 
 ```
 🥚·  Tokimon · Digitama Lv.0/100 [░░░░░░░░░░] 0 tok          ← fresh egg, resting
