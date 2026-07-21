@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Runtime state lives in ~/.claude/digimon/ (state.json, training/error logs),
+# never inside the repo — listed here only as a guard.
+state.json
+*.lock
+error.log
