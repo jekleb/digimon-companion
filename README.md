@@ -114,6 +114,8 @@ python3 digimon_cli.py <command>
 | `digimon_agents.py` | Detects the active subagent by parsing the transcript tail (async-aware; byte-prefiltered hot path) |
 | `digimon_sprites.py` | 8-bit half-block sprite renderer, shiny prestige recolor, agent styles, animation frames |
 | `digimon_cli.py` | The human-facing viewer/CLI |
+| `tokimon_feed.py` | JSON snapshot feed (stage, XP, sprite, palette, live agents) for the menu-bar app |
+| `menubar/main.swift` | The macOS menu-bar app — see [menubar/README.md](menubar/README.md) |
 | `evolution_data.json` | 16 stages, the level curve, cap tiers, 20-color palette, and pixel sprites |
 
 A few design notes:
@@ -157,6 +159,21 @@ Reach Lv.750 and the loop begins again, one prestige rank higher.
 
 ---
 
+## In the menu bar (macOS)
+
+The same companion, always visible — animated sprite, XP bar, level and prestige
+in the macOS menu bar, plus a detail panel on click.
+
+```bash
+cd menubar && ./build.sh
+```
+
+Needs only the Xcode Command Line Tools. The app is a pure presentation layer:
+all the pet's rules stay in the Python engine, which it polls through
+`tokimon_feed.py`. Full details in **[menubar/README.md](menubar/README.md)**.
+
+---
+
 ## Testing
 
 ```
@@ -164,8 +181,8 @@ python3 test_digimon.py
 ```
 
 A dependency-free assertion suite covering the curve math, token scanning,
-prestige/rebirth (including a full end-to-end hook run), agent detection, and
-sprite rendering/validation.
+prestige/rebirth (including a full end-to-end hook run), agent detection,
+sprite rendering/validation, and the menu-bar JSON feed.
 
 ---
 

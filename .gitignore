@@ -9,3 +9,6 @@ __pycache__/
 state.json
 *.lock
 error.log
+
+# Menu-bar app build output (compiled locally by menubar/build.sh)
+menubar/build/
