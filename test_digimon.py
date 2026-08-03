@@ -10,6 +10,7 @@ import digimon_lib as dl
 import digimon_hook as dh
 import digimon_agents as da
 import digimon_sprites as sprites
+import tokimon_feed as feed
 
 passed = 0
 
@@ -458,6 +459,73 @@ def test_stage_art_lines_prefers_sprite_then_art():
 def test_detect_active_agents_missing_path():
     check("no transcript path -> no active agents", da.detect_active_agents(None) == [])
     check("nonexistent transcript -> no active agents", da.detect_active_agents("/nope/x.jsonl") == [])
+
+
+def test_feed_is_json_serialisable_and_complete():
+    """The Swift menu-bar app decodes this into a struct with non-optional
+    fields, so a missing key is a crash over there, not a warning."""
+    payload = feed.build_feed()
+    required = {
+        "ok", "name", "stage", "level", "cap", "ceiling", "maxed_out", "progress",
+        "tokens_into_level", "tokens_span_level", "prestige", "prestige_badge",
+        "total_tokens", "total_tokens_human", "sprite", "palette",
+        "next_evolution", "training", "errors_24h",
+    }
+    check("feed carries every key the Swift app decodes", required <= set(payload))
+    check("feed round-trips through JSON", json.loads(json.dumps(payload)) == payload)
+    check("stage block is complete",
+          {"name", "stage", "emoji", "tagline"} <= set(payload["stage"]))
+    check("training is a list", isinstance(payload["training"], list))
+
+
+def test_feed_palette_has_no_transparent_entries():
+    """Swift treats 'key absent from the palette' as transparent, so the null
+    entries must be stripped rather than sent as JSON nulls."""
+    payload = feed.build_feed()
+    check("no null colors survive into the feed",
+          all(isinstance(v, str) and v.startswith("#") for v in payload["palette"].values()))
+    used = set("".join(payload["sprite"]))
+    unresolved = used - set(payload["palette"]) - set(". ")
+    check("every sprite glyph is either transparent or in the palette", not unresolved)
+
+
+def test_feed_prestige_recolor_matches_sprites_module():
+    payload = feed.build_feed()
+    data = dl.load_evolution_data()
+    expected = sprites.shiny_palette(data["palette"], payload["prestige"])
+    check("feed palette is the shiny palette for the current prestige",
+          all(payload["palette"][k] == expected[k] for k in payload["palette"]))
+
+
+def test_feed_next_evolution_agrees_with_the_stage_table():
+    payload = feed.build_feed()
+    data = dl.load_evolution_data()
+    upcoming = [s for s in data["stages"] if s["min"] > payload["level"]]
+    if upcoming:
+        check("next evolution is the next stage above the current level",
+              payload["next_evolution"]["name"] == upcoming[0]["name"])
+        check("next evolution is a non-negative distance",
+              payload["next_evolution"]["tokens_away"] >= 0)
+    else:
+        check("no next evolution at the ceiling", payload["next_evolution"] is None)
+
+
+def test_feed_transcript_scan_ignores_stale_and_missing():
+    with tempfile.TemporaryDirectory() as tmp:
+        old = os.path.join(tmp, "old.jsonl")
+        with open(old, "w") as f:
+            f.write("{}\n")
+        os.utime(old, (0, 0))  # far older than the freshness window
+        saved = feed.PROJECTS_DIR
+        try:
+            feed.PROJECTS_DIR = tmp
+            check("stale transcripts are not scanned", feed.recent_transcripts() == [])
+            feed.PROJECTS_DIR = "/nope/does/not/exist"
+            check("a missing projects dir yields no transcripts",
+                  feed.recent_transcripts() == [])
+            check("and therefore no training agents", feed.active_agents() == [])
+        finally:
+            feed.PROJECTS_DIR = saved
 
 
 def main():
