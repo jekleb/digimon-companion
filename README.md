@@ -202,6 +202,14 @@ The evolution tree is data-driven. To add stages or raise the ceiling, edit
 run `python3 digimon_cli.py doctor` — the validators enforce contiguous level
 bands, cap/curve alignment, and rectangular sprites using only palette colors.
 
+After any art change, regenerate the README's assets — they read
+`evolution_data.json`, so they can't drift from the real sprites:
+
+```bash
+python3 tools/make_preview.py   # preview.svg — the stage gallery
+python3 tools/make_demo.py      # demo.gif — climb, ceiling, shiny rebirth (needs Pillow)
+```
+
 Sprites take either shape, so a new stage can start as a single frame and gain
 animation later:
 
