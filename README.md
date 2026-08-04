@@ -115,6 +115,7 @@ python3 digimon_cli.py <command>
 | `digimon_sprites.py` | 8-bit half-block sprite renderer, shiny prestige recolor, agent styles, animation frames |
 | `digimon_cli.py` | The human-facing viewer/CLI |
 | `tokimon_feed.py` | JSON snapshot feed (stage, XP, sprite, palette, live agents) for the menu-bar app |
+| `tokimon_serve.py` | Serves that feed to phones/watches on the local network, token-protected |
 | `menubar/main.swift` | The macOS menu-bar app — see [menubar/README.md](menubar/README.md) |
 | `evolution_data.json` | 16 stages, the level curve, cap tiers, 20-color palette, and two-frame pixel sprites |
 
@@ -180,6 +181,32 @@ cd menubar && ./build.sh
 Needs only the Xcode Command Line Tools. The app is a pure presentation layer:
 all the pet's rules stay in the Python engine, which it polls through
 `tokimon_feed.py`. Full details in **[menubar/README.md](menubar/README.md)**.
+
+---
+
+## On your phone or watch
+
+The pet's state only exists on this Mac, so a phone has nothing to read. This
+bridges it over the **local network** — no account, no cloud, no API key, and
+your token spend never leaves the house:
+
+```bash
+python3 tokimon_serve.py
+```
+
+It prints the URL and a key:
+
+```
+  URL     http://192.168.4.23:8787/feed
+  Header  X-Tokimon-Key: <token>
+```
+
+Every data request needs that header — a header, not a query parameter, so the
+key stays out of URLs and proxy logs. `/health` answers without it (so a client
+can tell "wrong key" apart from "nothing there") and deliberately carries no pet
+data. The token is generated once into `~/.claude/digimon/serve_token` at 0600.
+
+Bind to this machine only with `--bind 127.0.0.1`.
 
 ---
 
