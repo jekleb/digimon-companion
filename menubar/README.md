@@ -8,12 +8,12 @@ inside a Claude Code session.
 🟠 ▮▮▮▯▯▯▯▯  Lv.428★
 ```
 
-- the current stage's **8-bit sprite**, running its own two-frame animation
+- the current stage's **16×16 8-bit creature**, running its own two-frame animation
   (2fps resting, 4fps while a subagent trains) on top of a slow breathe when
   idle and a sparring judder while training
 - a chunky **XP bar** whose leading segment charges, tinted with the pet's own palette
 - **level + prestige badge**, and the lead training agent's icon while training
-- click it for a panel with the sprite at 6×, stage, tagline, XP, lifetime
+- click it for a panel with the sprite at 6× (96pt), stage, tagline, XP, lifetime
   tokens, the next evolution, and the live training roster
 
 ## Requirements
@@ -94,7 +94,10 @@ python3 tokimon_feed.py --watch 2.5  # a line every 2.5s
 
 - **Pixel-crisp by construction.** Sprite and bar cells are snapped to whole
   device pixels before filling, so the art stays hard-edged on Retina and
-  non-Retina displays alike instead of going soft at fractional scales.
+  non-Retina displays alike instead of going soft at fractional scales. The
+  menu-bar sprite box is **16pt for a 16px grid** — a whole number of device
+  pixels at any backing scale. Change the grid size and that box has to change
+  with it, or the art lands on fractional pixels and goes soft.
 - **The engine is copied into the bundle**, not read from the checkout. If the
   repo lives under `~/Documents` (or `~/Desktop`, or iCloud Drive) it is
   TCC-protected, and a GUI-launched menu-bar app reading it **hangs forever** on

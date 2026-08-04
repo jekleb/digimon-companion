@@ -143,7 +143,7 @@ extension NSColor {
 
 // MARK: - Pixel drawing
 
-/// Snap a point-space rect to whole device pixels. Without this, a 12×12 sprite
+/// Snap a point-space rect to whole device pixels. Without this, a sprite
 /// scaled by a non-integer factor lands on half-pixels and the "8-bit" art comes
 /// out soft — the one thing this app must never look like.
 func snapToDevicePixels(_ rect: NSRect) -> NSRect {
@@ -288,7 +288,7 @@ final class DetailView: NSView {
 
     /// The panel grows with the training roster, so height is derived, not fixed.
     static func preferredHeight(for feed: Feed?) -> CGFloat {
-        var height: CGFloat = 188
+        var height: CGFloat = 212
         guard let feed else { return height }
         if feed.nextEvolution != nil { height += 18 }
         if feed.errors24h > 0 { height += 21 }
@@ -308,8 +308,8 @@ final class DetailView: NSView {
         let accent = feed.accent
         var y = bounds.maxY - pad
 
-        // --- sprite, scaled up to 6× so the pixel art actually reads ---
-        let art = NSRect(x: pad, y: y - 72, width: 72, height: 72)
+        // --- sprite at 6×; 16px grid -> 96pt ---
+        let art = NSRect(x: pad, y: y - 96, width: 96, height: 96)
         let bob: CGFloat = feed.isTraining
             ? CGFloat(Anim.trainShake[Anim.frame(t, 4, fps: 6)]) * 3
             : 0
@@ -551,7 +551,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.imagePosition = .imageOnly
 
-        detailView = DetailView(frame: NSRect(x: 0, y: 0, width: 360, height: 240))
+        detailView = DetailView(frame: NSRect(x: 0, y: 0, width: 400, height: 240))
         LoginItem.repairIfStale()
         buildMenu()
 
@@ -629,7 +629,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func sizeDetailView() {
-        detailView.frame = NSRect(x: 0, y: 0, width: 360,
+        detailView.frame = NSRect(x: 0, y: 0, width: 400,
                                   height: DetailView.preferredHeight(for: feed))
         detailView.needsDisplay = true
     }
@@ -717,7 +717,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let flashing = t < flashUntil
         let font = Self.barFont
 
-        let spriteSide: CGFloat = 18
+        // 16pt for a 16x16 sprite is a whole number of device pixels at every
+        // backing scale (2pt/px on Retina, 1 on non-Retina). Any other box size
+        // lands the grid on fractional pixels and the art goes soft — which is
+        // the one thing the snapping in drawSprite exists to prevent.
+        let spriteSide: CGFloat = 16
         let barW: CGFloat = 30
         let height: CGFloat = 18
 
@@ -742,7 +746,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let glow: CGFloat = flashing ? [0.0, 0.35][Anim.frame(t, 2, fps: 6)] : 0
 
             drawSprite(rows: feed.frame(at: t), colors: colors,
-                       in: NSRect(x: dx, y: dy, width: spriteSide, height: spriteSide),
+                       in: NSRect(x: dx, y: dy + (height - spriteSide) / 2,
+                                  width: spriteSide, height: spriteSide),
                        glow: glow)
 
             drawXPBar(in: NSRect(x: spriteSide + 5, y: 6, width: barW, height: 6),
@@ -878,7 +883,7 @@ func renderPanel(to path: String) -> Bool {
         FileHandle.standardError.write(Data("tokimon: could not read the feed\n".utf8))
         return false
     }
-    let view = DetailView(frame: NSRect(x: 0, y: 0, width: 360,
+    let view = DetailView(frame: NSRect(x: 0, y: 0, width: 400,
                                         height: DetailView.preferredHeight(for: feed)))
     view.feed = feed
     view.backdrop = NSColor.windowBackgroundColor

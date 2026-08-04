@@ -131,6 +131,10 @@ A few design notes:
   palette, rendered with the half-block (`▀`) trick so pixels come out square
   and the vertical resolution doubles. Falls back to a monochrome silhouette
   on terminals without truecolor.
+- **Creatures, not blobs.** The tree is drawn on a 16×16 grid so stages can have
+  arms, legs, wings and tails: egg → slime → imp → quadruped → bipedal dino →
+  bird → winged dragon → celestial forms. 12×12 had no room for a limb, which is
+  why the early sprites were symmetric blobs with features hung on them.
 - **Every stage is a two-frame loop** — a blink, an aura pixel moving, a spike
   rotating — cycling at 2fps resting and 4fps while training. A stage's `sprite`
   may be a single frame *or* a list of frames; `sprite_frames()` normalises the
