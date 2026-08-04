@@ -18,6 +18,11 @@ command -v swiftc >/dev/null 2>&1 || {
 }
 
 echo "==> preparing bundle"
+# Stop the running copy BEFORE deleting the bundle. Otherwise it keeps polling a
+# feed script that no longer exists and logs a spurious failure to
+# ~/.claude/digimon/menubar.log on every single rebuild — noise in the one
+# channel the README tells you to check first when the pet looks wrong.
+pkill -x Tokimon >/dev/null 2>&1 || true
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
@@ -94,8 +99,6 @@ echo "==> built $APP"
 
 if [ "${1:-}" != "--no-run" ]; then
   echo "==> launching"
-  pkill -x Tokimon >/dev/null 2>&1 || true
-  sleep 0.4
   open "$APP"
   echo "    look for the pet in your menu bar (far right of the icons)"
 fi
