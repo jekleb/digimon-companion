@@ -116,7 +116,7 @@ python3 digimon_cli.py <command>
 | `digimon_cli.py` | The human-facing viewer/CLI |
 | `tokimon_feed.py` | JSON snapshot feed (stage, XP, sprite, palette, live agents) for the menu-bar app |
 | `menubar/main.swift` | The macOS menu-bar app — see [menubar/README.md](menubar/README.md) |
-| `evolution_data.json` | 16 stages, the level curve, cap tiers, 20-color palette, and pixel sprites |
+| `evolution_data.json` | 16 stages, the level curve, cap tiers, 20-color palette, and two-frame pixel sprites |
 
 A few design notes:
 
@@ -131,6 +131,15 @@ A few design notes:
   palette, rendered with the half-block (`▀`) trick so pixels come out square
   and the vertical resolution doubles. Falls back to a monochrome silhouette
   on terminals without truecolor.
+- **Creatures, not blobs.** The tree is drawn on a 16×16 grid so stages can have
+  arms, legs, wings and tails: egg → slime → imp → quadruped → bipedal dino →
+  bird → winged dragon → celestial forms. 12×12 had no room for a limb, which is
+  why the early sprites were symmetric blobs with features hung on them.
+- **Every stage is a two-frame loop** — a blink, an aura pixel moving, a spike
+  rotating — cycling at 2fps resting and 4fps while training. A stage's `sprite`
+  may be a single frame *or* a list of frames; `sprite_frames()` normalises the
+  two shapes so nothing downstream has to care, and the validator enforces that
+  every frame of a stage agrees on size.
 
 ---
 
@@ -192,3 +201,11 @@ The evolution tree is data-driven. To add stages or raise the ceiling, edit
 `evolution_data.json` (stages, `cap_tiers`, `curve`, and `palette`/`sprite`), then
 run `python3 digimon_cli.py doctor` — the validators enforce contiguous level
 bands, cap/curve alignment, and rectangular sprites using only palette colors.
+
+Sprites take either shape, so a new stage can start as a single frame and gain
+animation later:
+
+```jsonc
+"sprite": ["....", "...."]                        // one frame
+"sprite": [["....", "...."], ["....", "...."]]    // an animation
+```

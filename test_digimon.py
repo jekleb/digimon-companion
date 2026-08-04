@@ -468,7 +468,7 @@ def test_feed_is_json_serialisable_and_complete():
     required = {
         "ok", "name", "stage", "level", "cap", "ceiling", "maxed_out", "progress",
         "tokens_into_level", "tokens_span_level", "prestige", "prestige_badge",
-        "total_tokens", "total_tokens_human", "sprite", "palette",
+        "total_tokens", "total_tokens_human", "frames", "sprite_fps", "palette",
         "next_evolution", "training", "errors_24h",
     }
     check("feed carries every key the Swift app decodes", required <= set(payload))
@@ -484,7 +484,7 @@ def test_feed_palette_has_no_transparent_entries():
     payload = feed.build_feed()
     check("no null colors survive into the feed",
           all(isinstance(v, str) and v.startswith("#") for v in payload["palette"].values()))
-    used = set("".join(payload["sprite"]))
+    used = set("".join("".join(f) for f in payload["frames"]))
     unresolved = used - set(payload["palette"]) - set(". ")
     check("every sprite glyph is either transparent or in the palette", not unresolved)
 
@@ -526,6 +526,63 @@ def test_feed_transcript_scan_ignores_stale_and_missing():
             check("and therefore no training agents", feed.active_agents() == [])
         finally:
             feed.PROJECTS_DIR = saved
+
+
+def test_sprite_frames_normalises_both_shapes():
+    """`sprite` may be one frame or a list of frames; every caller sees frames."""
+    single = {"sprite": ["ab", "cd"]}
+    multi = {"sprite": [["ab", "cd"], ["dc", "ba"]]}
+    check("a bare frame normalises to a one-frame list",
+          sprites.sprite_frames(single) == [["ab", "cd"]])
+    check("a frame list passes through",
+          sprites.sprite_frames(multi) == [["ab", "cd"], ["dc", "ba"]])
+    check("no sprite -> no frames", sprites.sprite_frames({}) == [])
+
+
+def test_stage_art_lines_selects_and_wraps_frames():
+    palette = {".": None, "c": "#5fd3ff", "y": "#ffd23f"}
+    stage = {"sprite": [["cc", "cc"], ["yy", "yy"]]}
+    f0 = sprites.stage_art_lines(stage, palette, color=True, frame=0)
+    f1 = sprites.stage_art_lines(stage, palette, color=True, frame=1)
+    check("frame 0 and frame 1 render differently", f0 != f1)
+    check("the frame index wraps", sprites.stage_art_lines(stage, palette, color=True, frame=2) == f0)
+    single = {"sprite": ["cc", "cc"]}
+    check("a single-frame stage ignores the frame index",
+          sprites.stage_art_lines(single, palette, color=True, frame=7)
+          == sprites.stage_art_lines(single, palette, color=True, frame=0))
+
+
+def test_every_stage_is_animated():
+    data = dl.load_evolution_data()
+    for stage in data["stages"]:
+        frames = sprites.sprite_frames(stage)
+        check(f"{stage['name']} has >1 frame", len(frames) > 1)
+        check(f"{stage['name']} frame 2 differs from frame 1", frames[0] != frames[1])
+
+
+def test_validate_sprites_catches_mismatched_frame_sizes():
+    """Frames of different sizes would make the pet jump around mid-loop."""
+    data = dl.load_evolution_data()
+    stages = [dict(s) for s in data["stages"]]
+    stages[0] = {**stages[0], "sprite": [["..", ".."], ["...", "...", "..."]]}
+    try:
+        dl.validate_sprites({**data, "stages": stages})
+        ok = False
+    except ValueError:
+        ok = True
+    check("validation rejects frames that disagree on size", ok)
+
+
+def test_validate_sprites_checks_every_frame_not_just_the_first():
+    data = dl.load_evolution_data()
+    stages = [dict(s) for s in data["stages"]]
+    stages[0] = {**stages[0], "sprite": [["..", ".."], ["..", "ZZ"]]}  # bad key in frame 2
+    try:
+        dl.validate_sprites({**data, "stages": stages})
+        ok = False
+    except ValueError:
+        ok = True
+    check("validation inspects frames beyond the first", ok)
 
 
 def main():

@@ -109,6 +109,7 @@ def build_feed(now=None):
     # Hand Swift the already-recolored palette so the shiny hue rotation lives
     # in one place; Swift just fills rects with the hexes it is given.
     palette = sprites.shiny_palette(data.get("palette") or {}, prestige)
+    active = active_agents(now=now)
 
     return {
         "ok": True,
@@ -131,10 +132,13 @@ def build_feed(now=None):
         "prestige_badge": dl.prestige_symbol(prestige) if prestige else "",
         "total_tokens": snap["total_tokens"],
         "total_tokens_human": dl.human_tokens(snap["total_tokens"]),
-        "sprite": stage.get("sprite") or [],
+        # Always a LIST OF FRAMES, even for a single-frame stage, so the Swift
+        # side has one shape to decode and animates without special cases.
+        "frames": sprites.sprite_frames(stage),
         "palette": {k: v for k, v in palette.items() if v},
+        "sprite_fps": sprites.SPRITE_FPS_TRAINING if active else sprites.SPRITE_FPS_IDLE,
         "next_evolution": next_evolution(snap, data),
-        "training": active_agents(now=now),
+        "training": active,
         "errors_24h": dl.recent_error_count(within_hours=24),
     }
 
