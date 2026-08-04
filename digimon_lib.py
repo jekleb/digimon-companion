@@ -82,13 +82,28 @@ def validate_sprites(data):
             continue
         if not isinstance(spr, list) or not spr:
             raise ValueError(f"stage {s['name']!r} sprite must be a non-empty list of rows")
-        width = len(spr[0])
-        for i, row in enumerate(spr):
-            if not isinstance(row, str) or len(row) != width:
-                raise ValueError(f"stage {s['name']!r} sprite row {i} is not rectangular (width {width})")
-            unknown = set(row) - palette_keys
-            if unknown:
-                raise ValueError(f"stage {s['name']!r} sprite row {i} uses non-palette keys {sorted(unknown)}")
+        # `sprite` is either one frame (list of row strings) or an animation
+        # (list of frames). Both are valid so a stage can stay single-frame.
+        frames = [spr] if isinstance(spr[0], str) else spr
+        size = None
+        for f, frame in enumerate(frames):
+            where = f"stage {s['name']!r}" + (f" frame {f}" if len(frames) > 1 else "")
+            if not isinstance(frame, list) or not frame or not all(isinstance(r, str) for r in frame):
+                raise ValueError(f"{where} must be a non-empty list of row strings")
+            width = len(frame[0])
+            for i, row in enumerate(frame):
+                if len(row) != width:
+                    raise ValueError(f"{where} row {i} is not rectangular (width {width})")
+                unknown = set(row) - palette_keys
+                if unknown:
+                    raise ValueError(f"{where} row {i} uses non-palette keys {sorted(unknown)}")
+            # Frames that differ in size would make the pet jump around mid-loop.
+            if size is None:
+                size = (len(frame), width)
+            elif (len(frame), width) != size:
+                raise ValueError(
+                    f"stage {s['name']!r} frame {f} is {len(frame)}x{width}, "
+                    f"but frame 0 is {size[0]}x{size[1]} — every frame must match")
 
 
 def tokens_for_level(level, curve):

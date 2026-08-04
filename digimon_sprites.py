@@ -12,7 +12,12 @@ import os
 
 import digimon_lib as dl
 
-FPS = 2  # animation frames per second
+FPS = 2  # animation frames per second (auras, shimmer, clash glyphs)
+
+# The sprite's own frame cycle, kept separate from FPS: the pet's body should
+# read as a deliberate 8-bit two-frame loop, and it speeds up when sparring.
+SPRITE_FPS_IDLE = 2
+SPRITE_FPS_TRAINING = 4
 
 # Each prestige rank rotates the whole palette's hue by the golden-ratio
 # fraction, so consecutive rebirth "lives" land ~137° apart on the color wheel —
@@ -60,8 +65,9 @@ def frame_index(t, n, fps=FPS):
 
 
 # ------------------------------------------------------------------------
-# 8-bit pixel sprites. Each stage stores a `sprite` (a list of equal-length
-# rows of single-char palette keys) and the file stores a shared `palette`
+# 8-bit pixel sprites. Each stage stores a `sprite` — either one frame (a list
+# of equal-length rows of single-char palette keys) or a list of such frames for
+# an animation — and the file stores a shared `palette`
 # (key -> "#rrggbb", or null for transparent). We render with the half-block
 # trick: one text row = two pixel rows, the upper pixel painted as the glyph's
 # foreground and the lower as its background — so pixels come out ~square and
@@ -136,13 +142,29 @@ def render_sprite(rows, palette, color=True):
     return out
 
 
-def stage_art_lines(stage, palette=None, color=False, prestige=0):
-    """Rendered pixel sprite for a stage, recolored for the prestige rank, with a
-    fallback to the legacy ASCII art when a stage has no sprite."""
+def sprite_frames(stage):
+    """A stage's sprite as a LIST OF FRAMES, whatever shape the data file uses.
+
+    `sprite` may be either a single frame (a list of row strings) or a list of
+    frames (a list of lists of row strings). Normalising here means every caller
+    animates for free and a stage that hasn't been given a second frame yet keeps
+    working untouched — the frame index just always lands on 0."""
     sprite = stage.get("sprite")
-    if sprite:
+    if not sprite:
+        return []
+    if isinstance(sprite[0], str):   # a bare frame
+        return [sprite]
+    return [f for f in sprite if f]
+
+
+def stage_art_lines(stage, palette=None, color=False, prestige=0, frame=0):
+    """Rendered pixel sprite for a stage, recolored for the prestige rank, with a
+    fallback to the legacy ASCII art when a stage has no sprite. `frame` selects
+    the animation frame and wraps, so callers can pass a free-running counter."""
+    frames = sprite_frames(stage)
+    if frames:
         pal = shiny_palette(palette or {}, prestige)
-        return render_sprite(sprite, pal, color=color)
+        return render_sprite(frames[frame % len(frames)], pal, color=color)
     return list(stage.get("art") or [])
 
 
@@ -217,7 +239,8 @@ def training_line(name, snap, active, t):
 # ------------------------------------------------------------------------
 def idle_scene(name, snap, t, palette=None, color=False):
     stage = snap["stage"]
-    art = stage_art_lines(stage, palette, color, snap.get("prestige", 0)) or [stage["emoji"]]
+    frame = frame_index(t, len(sprite_frames(stage)) or 1, fps=SPRITE_FPS_IDLE)
+    art = stage_art_lines(stage, palette, color, snap.get("prestige", 0), frame) or [stage["emoji"]]
     aura = IDLE_AURA[frame_index(t, len(IDLE_AURA))]
     bar = shimmer_bar(snap["level_progress_frac"], 24, t)
     lines = [""]
@@ -233,7 +256,8 @@ def idle_scene(name, snap, t, palette=None, color=False):
 
 def training_scene(name, snap, active, t, palette=None, color=False):
     stage = snap["stage"]
-    art = stage_art_lines(stage, palette, color, snap.get("prestige", 0)) or [stage["emoji"]]
+    frame = frame_index(t, len(sprite_frames(stage)) or 1, fps=SPRITE_FPS_TRAINING)
+    art = stage_art_lines(stage, palette, color, snap.get("prestige", 0), frame) or [stage["emoji"]]
     lead = active[0]
     emoji, label = agent_style(lead.get("agent"))
     action, verb = DOJO_ACTION[frame_index(t, len(DOJO_ACTION))]

@@ -44,18 +44,34 @@
         "   '-....-'"
       ],
       "sprite": [
-        "....KKKK....",
-        "..KKwwwwKK..",
-        ".KwwWWwwwwK.",
-        ".KwWwwwccwK.",
-        "KwwwwwwwwccK",
-        "KwcwwwwwwwwK",
-        "KwwwwccwwwwK",
-        "KwwwwccwwwwK",
-        ".KwcwwwwwwK.",
-        ".KwwwwwccwK.",
-        "..KKwwwwKK..",
-        "....KKKK...."
+        [
+          "....KKKK....",
+          "..KKwwwwKK..",
+          ".KwwWWwwwwK.",
+          ".KwWwwwccwK.",
+          "KwwwwwwwwccK",
+          "KwcwwwwwwwwK",
+          "KwwwwccwwwwK",
+          "KwwwwccwwwwK",
+          ".KwcwwwwwwK.",
+          ".KwwwwwccwK.",
+          "..KKwwwwKK..",
+          "....KKKK...."
+        ],
+        [
+          "....KKKK....",
+          "..KKwwwwKK..",
+          ".KwwWWwwwwK.",
+          ".KwWwccwwwK.",
+          "KwwwwwwccwwK",
+          "KwwcwwwwwwwK",
+          "KwwccwwwwwwK",
+          "KwwwwwwccwwK",
+          ".KcwwwwwwwK.",
+          ".KwwwccwwwK.",
+          "..KKwwwwKK..",
+          "....KKKK...."
+        ]
       ]
     },
     {
@@ -72,18 +88,34 @@
         "     '--'"
       ],
       "sprite": [
-        "............",
-        "............",
-        "...KKKKKK...",
-        "..KccccccK..",
-        ".KccccccccK.",
-        ".KcKcccKccK.",
-        ".KckccckccK.",
-        ".KcccccccK..",
-        "..KcceeccK..",
-        "...KKccKK...",
-        ".....KK.....",
-        "............"
+        [
+          "............",
+          "............",
+          "...KKKKKK...",
+          "..KccccccK..",
+          ".KccccccccK.",
+          ".KcKcccKccK.",
+          ".KckccckccK.",
+          ".KcccccccK..",
+          "..KcceeccK..",
+          "...KKccKK...",
+          ".....KK.....",
+          "............"
+        ],
+        [
+          "............",
+          "............",
+          "...KKKKKK...",
+          "..KccccccK..",
+          ".KccccccccK.",
+          ".KccccccccK.",
+          ".KckccckccK.",
+          ".KcccccccK..",
+          "..KcceeccK..",
+          "...KKccKK...",
+          ".....KK.....",
+          "............"
+        ]
       ]
     },
     {
@@ -101,18 +133,34 @@
         "    '-....-'"
       ],
       "sprite": [
-        "............",
-        "...KKKKKK...",
-        "..KccccccK..",
-        ".KcCcccCccK.",
-        ".KcKcccKccK.",
-        ".KckccckccK.",
-        "KccccccccccK",
-        "KcCcggggcCcK",
-        "KccceeeecccK",
-        ".KcccccccK..",
-        "..KKKKKKK...",
-        "..K......K.."
+        [
+          "............",
+          "...KKKKKK...",
+          "..KccccccK..",
+          ".KcCcccCccK.",
+          ".KcKcccKccK.",
+          ".KckccckccK.",
+          "KccccccccccK",
+          "KcCcggggcCcK",
+          "KccceeeecccK",
+          ".KcccccccK..",
+          "..KKKKKKK...",
+          "..K......K.."
+        ],
+        [
+          "............",
+          "...KKKKKK...",
+          "..KccccccK..",
+          ".KCcccccCcK.",
+          ".KccccccccK.",
+          ".KckccckccK.",
+          "KccccccccccK",
+          "KcCcggggcCcK",
+          "KccceeeecccK",
+          ".KcccccccK..",
+          "..KKKKKKK...",
+          "..K......K.."
+        ]
       ]
     },
     {
@@ -130,18 +178,34 @@
         "   ^        ^"
       ],
       "sprite": [
-        "..K......K..",
-        "..Ky....yK..",
-        ".Kyyk..kyyK.",
-        ".KyyyyyyyyK.",
-        "KyyKyyyKyyyK",
-        "KyykyyykyyyK",
-        "KyyyyyyyyyyK",
-        "KycyyeeyycyK",
-        ".KyyyyyyyyK.",
-        "..KyyyyyyK..",
-        "...K.yy.K...",
-        "...K.KK.K..."
+        [
+          "..K......K..",
+          "..Ky....yK..",
+          ".Kyyk..kyyK.",
+          ".KyyyyyyyyK.",
+          "KyyKyyyKyyyK",
+          "KyykyyykyyyK",
+          "KyyyyyyyyyyK",
+          "KycyyeeyycyK",
+          ".KyyyyyyyyK.",
+          "..KyyyyyyK..",
+          "...K.yy.K...",
+          "...K.KK.K..."
+        ],
+        [
+          "..K......K..",
+          "..Ky....yK..",
+          ".Kyyk..kyyK.",
+          ".KyyyyyyyyK.",
+          "KyyyyyyyyyyK",
+          "KyykyyykyyyK",
+          "KyyyyyyyyyyK",
+          "KyycyeeycyyK",
+          ".KyyyyyyyyK.",
+          "..KyyyyyyK..",
+          "...K.yy.K...",
+          "...K.KK.K..."
+        ]
       ]
     },
     {
@@ -162,18 +226,34 @@
         "    //     \\\\"
       ],
       "sprite": [
-        "...K....K...",
-        "..KCK..KCK..",
-        ".KCCCCCCCCK.",
-        ".KCCkCCkCCK.",
-        "KCCCCCCCCCCK",
-        "KCsCCeeCCsCK",
-        "KCCCsSSsCCCK",
-        "KCCSssssSCCK",
-        ".KCCSSSSCCK.",
-        ".KCC.KK.CCK.",
-        ".KK..CC..KK.",
-        ".....KK....."
+        [
+          "...K....K...",
+          "..KCK..KCK..",
+          ".KCCCCCCCCK.",
+          ".KCCkCCkCCK.",
+          "KCCCCCCCCCCK",
+          "KCsCCeeCCsCK",
+          "KCCCsSSsCCCK",
+          "KCCSssssSCCK",
+          ".KCCSSSSCCK.",
+          ".KCC.KK.CCK.",
+          ".KK..CC..KK.",
+          ".....KK....."
+        ],
+        [
+          "...K....K...",
+          "..KCK..KCK..",
+          ".KCCCCCCCCK.",
+          ".KCCkCCkCCK.",
+          "KCCCCCCCCCCK",
+          "KCCsCCCCsCCK",
+          "KCCCsSSsCCCK",
+          "KCCSssssSCCK",
+          ".KCCSSSSCCK.",
+          ".KCC.KK.CCK.",
+          ".KK..CC..KK.",
+          ".....KK....."
+        ]
       ]
     },
     {
@@ -194,18 +274,34 @@
         "     \\\\      //"
       ],
       "sprite": [
-        "...KKKKKK...",
-        ".KKpppbbbKK.",
-        "KppppbbbbBBK",
-        "KpppmmeebbBK",
-        "KpmmmeebbBBK",
-        "KppmmeebbbBK",
-        "KBppmmbbBBBK",
-        "KBBpppbbBmBK",
-        ".KBBpbbBBBK.",
-        "..KBBpbBBK..",
-        "...KKBBKK...",
-        ".....KK....."
+        [
+          "...KKKKKK...",
+          ".KKpppbbbKK.",
+          "KppppbbbbBBK",
+          "KpppmmeebbBK",
+          "KpmmmeebbBBK",
+          "KppmmeebbbBK",
+          "KBppmmbbBBBK",
+          "KBBpppbbBmBK",
+          ".KBBpbbBBBK.",
+          "..KBBpbBBK..",
+          "...KKBBKK...",
+          ".....KK....."
+        ],
+        [
+          "...KKKKKK...",
+          ".KKpppbbbKK.",
+          "KppppbbbbBBK",
+          "KpppmmmbbbBK",
+          "KpmmmeebbBBK",
+          "KppmmmbbbbBK",
+          "KBppmmbbBBBK",
+          "KBBpppbbBmBK",
+          ".KBBpbbBBBK.",
+          "..KBBpbBBK..",
+          "...KKBBKK...",
+          ".....KK....."
+        ]
       ]
     },
     {
@@ -226,18 +322,34 @@
         "       [[###]]"
       ],
       "sprite": [
-        "..K.KKKK.K..",
-        "..KooooooK..",
-        ".KooyooyooK.",
-        ".KoyyooyyoK.",
-        "KooooooooooK",
-        "KoyoeeeeoyoK",
-        "KooyooooyooK",
-        "KGGoooooGGoK",
-        ".KooyGGyooK.",
-        ".KKoooooKK..",
-        "..KK.oo.KK..",
-        "...K.KK.K..."
+        [
+          "..K.KKKK.K..",
+          "..KooooooK..",
+          ".KooyooyooK.",
+          ".KoyyooyyoK.",
+          "KooooooooooK",
+          "KoyoeeeeoyoK",
+          "KooyooooyooK",
+          "KGGoooooGGoK",
+          ".KooyGGyooK.",
+          ".KKoooooKK..",
+          "..KK.oo.KK..",
+          "...K.KK.K..."
+        ],
+        [
+          "..K.KKKK.K..",
+          "..KooooooK..",
+          ".KooyooyooK.",
+          ".KoyyooyyoK.",
+          "KooooooooooK",
+          "KoyooooooyoK",
+          "KooyooooyooK",
+          "KoGGoooGGooK",
+          ".KooyGGyooK.",
+          ".KKoooooKK..",
+          "..KK.oo.KK..",
+          "...K.KK.K..."
+        ]
       ]
     },
     {
@@ -257,18 +369,34 @@
         "     \\___|___/"
       ],
       "sprite": [
-        ".....G......",
-        "..G..G..G...",
-        "...GGyyGG...",
-        "..GyyGGyyG..",
-        "GGyyGeeGyyGG",
-        ".GGyyGGyyGG.",
-        "..GyyGGyyG..",
-        "..GGyGGyGG..",
-        ".G.GyyGG.G..",
-        "G...GGGG...G",
-        "....G..G....",
-        "...G....G..."
+        [
+          ".....G......",
+          "..G..G..G...",
+          "...GGyyGG...",
+          "..GyyGGyyG..",
+          "GGyyGeeGyyGG",
+          ".GGyyGGyyGG.",
+          "..GyyGGyyG..",
+          "..GGyGGyGG..",
+          ".G.GyyGG.G..",
+          "G...GGGG...G",
+          "....G..G....",
+          "...G....G..."
+        ],
+        [
+          "......G.....",
+          "..G..G..G...",
+          "...GGyyGG...",
+          "..GyyGGyyG..",
+          "GGyyGGGGyyGG",
+          ".GGyyGGyyGG.",
+          "..GyyGGyyG..",
+          "..GGyGGyGG..",
+          ".G.GyyGG.G..",
+          "G...GGGG...G",
+          ".....GG.....",
+          "....G..G...."
+        ]
       ]
     },
     {
@@ -290,18 +418,34 @@
         "    ^^  ^     ^ ^^"
       ],
       "sprite": [
-        "..G.GG.G.G..",
-        "..GyGyGyGy..",
-        "...KGGGGK...",
-        "..KwWWWWwK..",
-        ".KwWyGGyWwK.",
-        ".KwyeeeeywK.",
-        ".KwWyGGyWwK.",
-        "KwwWWWWWWwwK",
-        "KwGWWWWWWGwK",
-        ".KwwWWWWwwK.",
-        "..KKwGGwKK..",
-        "...K.KK.K..."
+        [
+          "..G.GG.G.G..",
+          "..GyGyGyGy..",
+          "...KGGGGK...",
+          "..KwWWWWwK..",
+          ".KwWyGGyWwK.",
+          ".KwyeeeeywK.",
+          ".KwWyGGyWwK.",
+          "KwwWWWWWWwwK",
+          "KwGWWWWWWGwK",
+          ".KwwWWWWwwK.",
+          "..KKwGGwKK..",
+          "...K.KK.K..."
+        ],
+        [
+          "..G.GG.G.G..",
+          "..yGyGyGyG..",
+          "...KGGGGK...",
+          "..KwWWWWwK..",
+          ".KwWyGGyWwK.",
+          ".KwyWWWWywK.",
+          ".KwWyGGyWwK.",
+          "KwwWWWWWWwwK",
+          "KwGWWWWWWGwK",
+          ".KwwWWWWwwK.",
+          "..KKwGGwKK..",
+          "...K.KK.K..."
+        ]
       ]
     },
     {
@@ -321,18 +465,34 @@
         "      /_____\\"
       ],
       "sprite": [
-        "....W..W....",
-        "..W.WppW.W..",
-        "...WppppW...",
-        "W.WpmWWmpW.W",
-        ".WppWeeWppW.",
-        "WpmWppppWmpW",
-        ".WppWeeWppW.",
-        "W.WpmWWmpW.W",
-        "...WppppW...",
-        "..W.WppW.W..",
-        "....W..W....",
-        "...W....W..."
+        [
+          "....W..W....",
+          "..W.WppW.W..",
+          "...WppppW...",
+          "W.WpmWWmpW.W",
+          ".WppWeeWppW.",
+          "WpmWppppWmpW",
+          ".WppWeeWppW.",
+          "W.WpmWWmpW.W",
+          "...WppppW...",
+          "..W.WppW.W..",
+          "....W..W....",
+          "...W....W..."
+        ],
+        [
+          ".....WW.....",
+          "..W.WppW.W..",
+          "...WppppW...",
+          "W.WpmWWmpW.W",
+          ".WppWppWppW.",
+          "WpmWppppWmpW",
+          ".WppWppWppW.",
+          "W.WpmWWmpW.W",
+          "...WppppW...",
+          "..W.WppW.W..",
+          "....W..W....",
+          "....W..W...."
+        ]
       ]
     },
     {
@@ -354,18 +514,34 @@
         "  ^^  ^       ^  ^^"
       ],
       "sprite": [
-        "..G.GGGG.G..",
-        ".GyGGBBGGyG.",
-        "..KBBBBBBK..",
-        ".KBbbppbbBK.",
-        "KBbpGGGGpbBK",
-        "KBbpGeeGpbBK",
-        "KBbppGGppbBK",
-        "KBBbbppbbBBK",
-        ".KBBbppbBBK.",
-        ".GKKBBBBKKG.",
-        "GyG.KGGK.GyG",
-        "..G..KK..G.."
+        [
+          "..G.GGGG.G..",
+          ".GyGGBBGGyG.",
+          "..KBBBBBBK..",
+          ".KBbbppbbBK.",
+          "KBbpGGGGpbBK",
+          "KBbpGeeGpbBK",
+          "KBbppGGppbBK",
+          "KBBbbppbbBBK",
+          ".KBBbppbBBK.",
+          ".GKKBBBBKKG.",
+          "GyG.KGGK.GyG",
+          "..G..KK..G.."
+        ],
+        [
+          "..G.GGGG.G..",
+          ".GGyGBBGyGG.",
+          "..KBBBBBBK..",
+          ".KBbbppbbBK.",
+          "KBbpGGGGpbBK",
+          "KBbpGGGGpbBK",
+          "KBbppGGppbBK",
+          "KBBbbppbbBBK",
+          ".KBBbppbBBK.",
+          ".GKKBBBBKKG.",
+          "yGG.KGGK.GGy",
+          "..G..KK..G.."
+        ]
       ]
     },
     {
@@ -376,18 +552,34 @@
       "emoji": "\u2604\ufe0f",
       "tagline": "Past the Sovereign ceiling \u2014 burning brighter than the cap allowed.",
       "sprite": [
-        "....GGGG....",
-        "..GGyooyGG..",
-        ".GyorWWroyG.",
-        ".GorWeeWroG.",
-        "GyorWkkWroyG",
-        "GyorWWWWroyG",
-        ".GorWeeWroG.",
-        ".GyorWWroyG.",
-        "..GGyooyGG..",
-        "...oo..oo...",
-        "..o......o..",
-        ".o........o."
+        [
+          "....GGGG....",
+          "..GGyooyGG..",
+          ".GyorWWroyG.",
+          ".GorWeeWroG.",
+          "GyorWkkWroyG",
+          "GyorWWWWroyG",
+          ".GorWeeWroG.",
+          ".GyorWWroyG.",
+          "..GGyooyGG..",
+          "...oo..oo...",
+          "..o......o..",
+          ".o........o."
+        ],
+        [
+          "....GGGG....",
+          "..GGyooyGG..",
+          ".GyorWWroyG.",
+          ".GorWWWWroG.",
+          "GyorWkkWroyG",
+          "GyorWWWWroyG",
+          ".GorWWWWroG.",
+          ".GyorWWroyG.",
+          "..GGyooyGG..",
+          "...oo..oo...",
+          "..o......o..",
+          "..o......o.."
+        ]
       ]
     },
     {
@@ -398,18 +590,34 @@
       "emoji": "\ud83e\ude90",
       "tagline": "Orbiting laws of its own making.",
       "sprite": [
-        "....pppp....",
-        "..pppppppp..",
-        ".pbbppppbbp.",
-        "GpbbbeebbbpG",
-        "GGpbbeebbpGG",
-        "GpbbbppbbbpG",
-        ".pppppppppp.",
-        "..pbbppbbp..",
-        "...pp..pp...",
-        "..G......G..",
-        ".G........G.",
-        "G..........G"
+        [
+          "....pppp....",
+          "..pppppppp..",
+          ".pbbppppbbp.",
+          "GpbbbeebbbpG",
+          "GGpbbeebbpGG",
+          "GpbbbppbbbpG",
+          ".pppppppppp.",
+          "..pbbppbbp..",
+          "...pp..pp...",
+          "..G......G..",
+          ".G........G.",
+          "G..........G"
+        ],
+        [
+          "....pppp....",
+          "..pppppppp..",
+          ".pbbppppbbp.",
+          "GpbbbbbbbbpG",
+          "GGpbbeebbpGG",
+          "GpbbbppbbbpG",
+          ".pppppppppp.",
+          "..pbbppbbp..",
+          "...pp..pp...",
+          "...G....G...",
+          ".G........G.",
+          "G..........G"
+        ]
       ]
     },
     {
@@ -420,18 +628,34 @@
       "emoji": "\ud83d\udcab",
       "tagline": "Pulsing with borrowed starlight.",
       "sprite": [
-        ".....cc.....",
-        "..c..cc..c..",
-        "...c.cc.c...",
-        "....cWWc....",
-        "cc.cWeeWc.cc",
-        "..cWWeeWWc..",
-        "..cWWeeWWc..",
-        "cc.cWWWWc.cc",
-        "....cWWc....",
-        "...c.cc.c...",
-        "..c..cc..c..",
-        ".....cc....."
+        [
+          ".....cc.....",
+          "..c..cc..c..",
+          "...c.cc.c...",
+          "....cWWc....",
+          "cc.cWeeWc.cc",
+          "..cWWeeWWc..",
+          "..cWWeeWWc..",
+          "cc.cWWWWc.cc",
+          "....cWWc....",
+          "...c.cc.c...",
+          "..c..cc..c..",
+          ".....cc....."
+        ],
+        [
+          "............",
+          "..c..cc..c..",
+          "...c.cc.c...",
+          "....cWWc....",
+          ".c.cWWWWc.c.",
+          "..cWWWWWWc..",
+          "..cWWWWWWc..",
+          ".c.cWWWWc.c.",
+          "....cWWc....",
+          "...c.cc.c...",
+          "..c..cc..c..",
+          "............"
+        ]
       ]
     },
     {
@@ -442,18 +666,34 @@
       "emoji": "\ud83c\udf20",
       "tagline": "The brightest thing for lightyears.",
       "sprite": [
-        "....mmmm....",
-        "..mmGGGGmm..",
-        ".mGGmmmmGGm.",
-        ".mGmWWWWmGm.",
-        "mGGmWeeWmGGm",
-        "mGGmWeeWmGGm",
-        ".mGmWWWWmGm.",
-        ".mGGmmmmGGm.",
-        "..mmGGGGmm..",
-        "...mm..mm...",
-        "....G..G....",
-        "...G....G..."
+        [
+          "....mmmm....",
+          "..mmGGGGmm..",
+          ".mGGmmmmGGm.",
+          ".mGmWWWWmGm.",
+          "mGGmWeeWmGGm",
+          "mGGmWeeWmGGm",
+          ".mGmWWWWmGm.",
+          ".mGGmmmmGGm.",
+          "..mmGGGGmm..",
+          "...mm..mm...",
+          "....G..G....",
+          "...G....G..."
+        ],
+        [
+          "....mmmm....",
+          "..mmGGGGmm..",
+          ".mGGmmmmGGm.",
+          ".mGmWWWWmGm.",
+          "mGGmWWWWmGGm",
+          "mGGmWWWWmGGm",
+          ".mGmWWWWmGm.",
+          ".mGGmmmmGGm.",
+          "..mmGGGGmm..",
+          "...mm..mm...",
+          ".....GG.....",
+          "....G..G...."
+        ]
       ]
     },
     {
@@ -464,18 +704,34 @@
       "emoji": "\u267e\ufe0f",
       "tagline": "The new ceiling. Reach it and the cycle begins again.",
       "sprite": [
-        "..G.GGGG.G..",
-        ".GyGGGGGGyG.",
-        "..GBBBBBBG..",
-        ".GBbppppbBG.",
-        "GBbpGWWGpbBG",
-        "GBbpWeeeWpBG",
-        "GBbpGWWWGpBG",
-        "GBBbbppppbBG",
-        ".GBBbppbBBG.",
-        ".GyKBBBBKyG.",
-        "GyG.KGGK.GyG",
-        "..G..KK..G.."
+        [
+          "..G.GGGG.G..",
+          ".GyGGGGGGyG.",
+          "..GBBBBBBG..",
+          ".GBbppppbBG.",
+          "GBbpGWWGpbBG",
+          "GBbpWeeeWpBG",
+          "GBbpGWWWGpBG",
+          "GBBbbppppbBG",
+          ".GBBbppbBBG.",
+          ".GyKBBBBKyG.",
+          "GyG.KGGK.GyG",
+          "..G..KK..G.."
+        ],
+        [
+          "..G.GGGG.G..",
+          ".GGyGGGGyGG.",
+          "..GBBBBBBG..",
+          ".GBbppppbBG.",
+          "GBbpGWWGpbBG",
+          "GBbpWWWWWpBG",
+          "GBbpGWWWGpBG",
+          "GBBbbppppbBG",
+          ".GBBbppbBBG.",
+          ".GyKBBBBKyG.",
+          "yGG.KGGK.GGy",
+          "..G..KK..G.."
+        ]
       ]
     }
   ],

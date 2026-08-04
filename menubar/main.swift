@@ -60,14 +60,17 @@ struct Feed: Decodable {
     let prestigeBadge: String
     let totalTokens: Int
     let totalTokensHuman: String
-    let sprite: [String]
+    /// Always a list of frames, even when a stage has only one.
+    let frames: [[String]]
+    let spriteFPS: Double
     let palette: [String: String]
     let nextEvolution: NextEvolution?
     let training: [TrainingAgent]
     let errors24h: Int
 
     enum CodingKeys: String, CodingKey {
-        case ok, name, stage, level, cap, ceiling, progress, prestige, sprite, palette, training
+        case ok, name, stage, level, cap, ceiling, progress, prestige, frames, palette, training
+        case spriteFPS = "sprite_fps"
         case maxedOut = "maxed_out"
         case tokensIntoLevel = "tokens_into_level"
         case tokensSpanLevel = "tokens_span_level"
@@ -79,6 +82,14 @@ struct Feed: Decodable {
     }
 
     var isTraining: Bool { !training.isEmpty }
+
+    /// The sprite frame to draw at wall-clock `t`. The engine picks the rate
+    /// (slower resting, quicker sparring) so the Mac app and the terminal
+    /// status line stay in step.
+    func frame(at t: Double) -> [String] {
+        guard !frames.isEmpty else { return [] }
+        return frames[Anim.frame(t, frames.count, fps: spriteFPS)]
+    }
 
     /// Palette resolved to colors once per feed, not once per drawn pixel.
     var colors: [Character: NSColor] {
@@ -303,7 +314,7 @@ final class DetailView: NSView {
             ? CGFloat(Anim.trainShake[Anim.frame(t, 4, fps: 6)]) * 3
             : 0
         let lift: CGFloat = feed.isTraining ? 0 : CGFloat(Anim.idleBob[Anim.frame(t, 4, fps: 2)]) * 3
-        drawSprite(rows: feed.sprite, colors: colors,
+        drawSprite(rows: feed.frame(at: t), colors: colors,
                    in: art.offsetBy(dx: bob, dy: lift))
 
         // --- headline block to the right of the sprite ---
@@ -730,7 +741,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 : CGFloat(Anim.idleBob[Anim.frame(t, 4, fps: 2)])
             let glow: CGFloat = flashing ? [0.0, 0.35][Anim.frame(t, 2, fps: 6)] : 0
 
-            drawSprite(rows: feed.sprite, colors: colors,
+            drawSprite(rows: feed.frame(at: t), colors: colors,
                        in: NSRect(x: dx, y: dy, width: spriteSide, height: spriteSide),
                        glow: glow)
 

@@ -8,8 +8,9 @@ inside a Claude Code session.
 🟠 ▮▮▮▯▯▯▯▯  Lv.428★
 ```
 
-- the current stage's **8-bit sprite**, animated (a slow breathe when idle, a
-  sparring judder while a subagent runs)
+- the current stage's **8-bit sprite**, running its own two-frame animation
+  (2fps resting, 4fps while a subagent trains) on top of a slow breathe when
+  idle and a sparring judder while training
 - a chunky **XP bar** whose leading segment charges, tinted with the pet's own palette
 - **level + prestige badge**, and the lead training agent's icon while training
 - click it for a panel with the sprite at 6×, stage, tagline, XP, lifetime
