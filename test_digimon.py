@@ -3,6 +3,8 @@
 import os
 import sys
 import tempfile
+import threading
+import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import json
@@ -11,6 +13,7 @@ import digimon_hook as dh
 import digimon_agents as da
 import digimon_sprites as sprites
 import tokimon_feed as feed
+import tokimon_serve as serve
 
 passed = 0
 
@@ -583,6 +586,83 @@ def test_validate_sprites_checks_every_frame_not_just_the_first():
     except ValueError:
         ok = True
     check("validation inspects frames beyond the first", ok)
+
+
+def _serve_request(path, token=None, srv_token="secret-token"):
+    """Drive one request through the real handler over a real socket, so the
+    auth path being tested is the one that actually runs."""
+    import http.client
+    server = serve.make_server(0, "127.0.0.1", srv_token, quiet=True)
+    port = server.server_address[1]
+    t = threading.Thread(target=server.handle_request, daemon=True)
+    t.start()
+    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+    headers = {serve.HEADER: token} if token is not None else {}
+    conn.request("GET", path, headers=headers)
+    resp = conn.getresponse()
+    body = json.loads(resp.read() or b"{}")
+    status = resp.status
+    conn.close()
+    t.join(timeout=5)
+    server.server_close()
+    return status, body
+
+
+def test_serve_requires_a_token_for_pet_data():
+    status, body = _serve_request("/feed")
+    check("no token -> 401", status == 401)
+    check("401 body names the header", serve.HEADER in body.get("error", ""))
+    status, _ = _serve_request("/feed", token="wrong")
+    check("wrong token -> 401", status == 401)
+    status, body = _serve_request("/feed", token="secret-token")
+    check("right token -> 200", status == 200)
+    check("authorised response carries the pet", body.get("name") and body.get("frames"))
+
+
+def test_serve_health_is_open_but_carries_no_pet_data():
+    """A client needs to tell 'wrong key' apart from 'nothing there', so health
+    answers without a token — and therefore must leak nothing."""
+    status, body = _serve_request("/health")
+    check("health needs no token", status == 200)
+    check("health advertises that a token is needed", body.get("needs_token") is True)
+    leaky = {"name", "level", "total_tokens", "frames", "training"} & set(body)
+    check("health exposes no pet data", not leaky)
+
+
+def test_serve_unknown_paths_404():
+    status, _ = _serve_request("/secrets", token="secret-token")
+    check("unknown path -> 404", status == 404)
+
+
+def test_serve_token_is_persistent_and_private():
+    with tempfile.TemporaryDirectory() as tmp:
+        saved_dir, saved_path = dl.DIGIMON_DIR, serve.TOKEN_PATH
+        try:
+            dl.DIGIMON_DIR = tmp
+            serve.TOKEN_PATH = os.path.join(tmp, "serve_token")
+            first = serve.load_or_create_token()
+            check("a token is generated on first run", len(first) > 20)
+            check("the same token is reused", serve.load_or_create_token() == first)
+            mode = os.stat(serve.TOKEN_PATH).st_mode & 0o777
+            check("token file is owner-only (0600)", mode == 0o600)
+        finally:
+            dl.DIGIMON_DIR, serve.TOKEN_PATH = saved_dir, saved_path
+
+
+def test_serve_cache_collapses_rapid_polls():
+    """Phone and watch poll independently; they should not each rebuild the feed."""
+    calls = []
+    real = feed.build_feed
+    try:
+        feed.build_feed = lambda *a, **k: (calls.append(1), {"ok": True})[1]
+        cache = serve.FeedCache(ttl=60)
+        for _ in range(5):
+            cache.get()
+        check("five rapid reads rebuild the feed once", len(calls) == 1)
+        cache.get(now=time.time() + 120)
+        check("the cache does expire", len(calls) == 2)
+    finally:
+        feed.build_feed = real
 
 
 def main():
