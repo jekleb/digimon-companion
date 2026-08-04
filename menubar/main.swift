@@ -7,9 +7,10 @@
 // `tokimon_feed.py`, which hands back an already-resolved snapshot including the
 // sprite rows and the prestige-shifted palette, and draws it.
 //
-// Two clocks on purpose: DATA is polled every few seconds (a subprocess), while
-// the ANIMATION redraws several times a second from a wall-clock frame index.
-// That keeps the pet visibly alive without spawning a process per frame.
+// Two clocks on purpose: DATA is polled on a subprocess (lazily when idle,
+// briskly while training), while the ANIMATION redraws several times a second
+// from a wall-clock frame index. That keeps the pet visibly alive without
+// spawning a process per frame.
 
 import AppKit
 import Foundation
@@ -279,6 +280,7 @@ final class DetailView: NSView {
         var height: CGFloat = 188
         guard let feed else { return height }
         if feed.nextEvolution != nil { height += 18 }
+        if feed.errors24h > 0 { height += 21 }
         if feed.isTraining { height += 26 + CGFloat(min(4, feed.training.count)) * 16 }
         if feed.maxedOut { height -= 16 }
         return height
@@ -350,6 +352,16 @@ final class DetailView: NSView {
                       font: .systemFont(ofSize: 11), color: .tertiaryLabelColor)
         }
 
+        // The engine logs its own failures to ~/.claude/digimon/error.log. The
+        // CLI's `doctor` surfaces them; without this the menu bar would be the
+        // one view that silently hides a pet quietly breaking.
+        if feed.errors24h > 0 {
+            y -= 6
+            y -= draw("⚠︎ \(feed.errors24h) engine error\(feed.errors24h == 1 ? "" : "s") in 24h — run `digimon_cli.py doctor`",
+                      at: NSPoint(x: pad, y: y), width: bounds.width - pad * 2,
+                      font: .systemFont(ofSize: 11), color: .systemOrange)
+        }
+
         // --- training roster ---
         if feed.isTraining {
             y -= 10
@@ -416,6 +428,9 @@ final class FeedPoller {
     private let script: String
     private let queue = DispatchQueue(label: "tokimon.feed", qos: .utility)
     var onUpdate: ((Feed) -> Void)?
+    /// Called after every run, success or failure — the caller drives its poll
+    /// cadence from this, so a failing feed still gets retried.
+    var onFinish: (() -> Void)?
     var lastError: String?
 
     init(python: String, script: String) {
@@ -440,6 +455,7 @@ final class FeedPoller {
                     self.lastError = error.description
                     logLine("feed failed: \(error.description)")
                 }
+                self.onFinish?()
             }
         }
     }
@@ -488,9 +504,21 @@ final class FeedPoller {
         do {
             return .success(try JSONDecoder().decode(Feed.self, from: data))
         } catch {
+            // The feed reports its own failures as {"ok": false, "error": ...},
+            // which of course doesn't decode as a Feed. Surface what Python
+            // actually said rather than burying it under a decoder complaint.
+            if let reported = try? JSONDecoder().decode(FeedFailure.self, from: data), !reported.ok {
+                return .failure(FeedError("engine error: \(reported.error)"))
+            }
             return .failure(FeedError("bad feed JSON: \(error)"))
         }
     }
+}
+
+/// The shape `tokimon_feed.py` emits when it cannot build a snapshot.
+struct FeedFailure: Decodable {
+    let ok: Bool
+    let error: String
 }
 
 // MARK: - App
@@ -513,27 +541,42 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         statusItem.button?.imagePosition = .imageOnly
 
         detailView = DetailView(frame: NSRect(x: 0, y: 0, width: 360, height: 240))
+        LoginItem.repairIfStale()
         buildMenu()
 
         poller = FeedPoller(python: Paths.python, script: Paths.feedScript)
         poller.onUpdate = { [weak self] feed in self?.apply(feed) }
+        // Rescheduling on *finish* rather than on success keeps the loop alive
+        // through a run of failures — otherwise one bad poll stops the pet dead.
+        poller.onFinish = { [weak self] in self?.schedulePoll() }
         poller.poll()
 
-        // Both timers go in .common mode so the pet keeps animating while the
-        // menu is open (menu tracking otherwise starves the default runloop).
+        // The animation timer goes in .common mode so the pet keeps moving while
+        // the menu is open (menu tracking otherwise starves the default runloop).
         let anim = Timer(timeInterval: 1.0 / Anim.barFPS, repeats: true) { [weak self] _ in
             self?.redraw()
         }
         RunLoop.main.add(anim, forMode: .common)
         animTimer = anim
 
-        let poll = Timer(timeInterval: 3.0, repeats: true) { [weak self] _ in
+        redraw()
+    }
+
+    // Idle spends most of the day, so it polls lazily; a training run is the one
+    // time the pet should feel immediate. Each feed run costs a Python start
+    // (~50ms) plus a stat of every recent transcript, so a flat 3s cadence spent
+    // most of its budget confirming that nothing had changed.
+    private static let idleInterval: TimeInterval = 10
+    private static let trainingInterval: TimeInterval = 2
+
+    private func schedulePoll() {
+        pollTimer?.invalidate()
+        let interval = (feed?.isTraining ?? false) ? Self.trainingInterval : Self.idleInterval
+        let timer = Timer(timeInterval: interval, repeats: false) { [weak self] _ in
             self?.poller.poll()
         }
-        RunLoop.main.add(poll, forMode: .common)
-        pollTimer = poll
-
-        redraw()
+        RunLoop.main.add(timer, forMode: .common)
+        pollTimer = timer
     }
 
     // MARK: menu
@@ -593,7 +636,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func openLiveView() {
-        let cmd = "cd \(Paths.repoDir) && \(Paths.python) digimon_cli.py live"
+        let cmd = "cd '\(Paths.repoDir)' && '\(Paths.python)' digimon_cli.py live"
         let script = """
         tell application "Terminal"
             activate
@@ -623,6 +666,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         lastStageName = feed.stage.name
         self.feed = feed
         detailView.feed = feed
+        // Resize here too, not only when the menu opens: if a training run starts
+        // while the panel is on screen, the roster needs the extra height or it
+        // draws off the bottom edge.
+        sizeDetailView()
         redraw()
     }
 
@@ -638,19 +685,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         detailView.needsDisplay = true
     }
 
+    private static let barFont = NSFont.monospacedDigitSystemFont(ofSize: 9.5, weight: .semibold)
+
+    /// The clash glyphs are not the same width, and they cycle 5×/sec. Drawing
+    /// them inline would resize the status item — and therefore shove every menu
+    /// bar icon to its left — five times a second for the whole training run. So
+    /// the glyph gets a fixed slot wide enough for the widest of them.
+    private static let clashSlot: CGFloat = ceil(Anim.clash
+        .map { NSAttributedString(string: $0, attributes: [.font: barFont]).size().width }
+        .max() ?? 10)
+
+    private static func textWidth(_ s: String) -> CGFloat {
+        ceil(NSAttributedString(string: s, attributes: [.font: barFont]).size().width)
+    }
+
     private func barImage(_ feed: Feed) -> NSImage {
         let t = Date().timeIntervalSince1970
         let colors = feed.colors
         let accent = feed.accent
         let flashing = t < flashUntil
+        let font = Self.barFont
 
         let spriteSide: CGFloat = 18
         let barW: CGFloat = 30
-        let label = statusLabel(feed)
-        let font = NSFont.monospacedDigitSystemFont(ofSize: 9.5, weight: .semibold)
-        let labelW = ceil(NSAttributedString(string: label, attributes: [.font: font]).size().width)
         let height: CGFloat = 18
-        let width = spriteSide + 5 + barW + 5 + labelW
+
+        // Level text is stable frame to frame; only the training suffix animates,
+        // and it is laid out on a fixed grid so the total width never changes.
+        let label = levelLabel(feed)
+        let labelW = Self.textWidth(label)
+        let agentEmoji = feed.training.first?.emoji ?? ""
+        let suffixW = feed.isTraining
+            ? 4 + Self.clashSlot + Self.textWidth(agentEmoji)
+            : 0
+        let textX = spriteSide + 5 + barW + 5
+        let width = textX + labelW + suffixW
 
         let image = NSImage(size: NSSize(width: width, height: height), flipped: false) { _ in
             let dx: CGFloat = feed.isTraining
@@ -675,21 +744,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 .foregroundColor: NSColor.labelColor,
             ]
             let s = NSAttributedString(string: label, attributes: attrs)
-            s.draw(at: NSPoint(x: spriteSide + 5 + barW + 5,
-                               y: (height - s.size().height) / 2 + 0.5))
+            let baseline = (height - s.size().height) / 2 + 0.5
+            s.draw(at: NSPoint(x: textX, y: baseline))
+
+            if feed.isTraining {
+                let clash = NSAttributedString(string: Anim.clash[Anim.frame(t, 4, fps: 5)],
+                                               attributes: attrs)
+                // centered in its fixed slot, so a narrower glyph doesn't shift
+                // anything — it just sits with a little more air either side
+                let slotX = textX + labelW + 4
+                clash.draw(at: NSPoint(x: slotX + (Self.clashSlot - clash.size().width) / 2,
+                                       y: baseline))
+                NSAttributedString(string: agentEmoji, attributes: attrs)
+                    .draw(at: NSPoint(x: slotX + Self.clashSlot, y: baseline))
+            }
             return true
         }
         image.isTemplate = false   // pixel art keeps its own colors
         return image
     }
 
-    private func statusLabel(_ feed: Feed) -> String {
+    private func levelLabel(_ feed: Feed) -> String {
         var text = feed.maxedOut ? "MAX" : "Lv.\(feed.level)"
         if feed.prestige > 0 { text += feed.prestigeBadge }
-        if let lead = feed.training.first {
-            let t = Date().timeIntervalSince1970
-            text += " \(Anim.clash[Anim.frame(t, 4, fps: 5)])\(lead.emoji)"
-        }
         return text
     }
 }
@@ -705,8 +782,52 @@ enum LoginItem {
 
     static var isInstalled: Bool { FileManager.default.fileExists(atPath: plistPath) }
 
+    /// What launchd should run. Resolved from the bundle rather than
+    /// `CommandLine.arguments[0]`, which can be relative or symlinked depending
+    /// on how the app was started.
+    static var targetExecutable: String {
+        if let exe = Bundle.main.executableURL?.resolvingSymlinksInPath().path { return exe }
+        return URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath().path
+    }
+
+    /// Gatekeeper runs a quarantined app from a read-only temporary mount. That
+    /// path disappears on quit, so recording it as a login item would guarantee
+    /// a broken one.
+    static var isTranslocated: Bool {
+        targetExecutable.contains("/AppTranslocation/")
+    }
+
+    /// The path currently recorded in the installed plist, if there is one.
+    static var installedExecutable: String? {
+        guard let data = FileManager.default.contents(atPath: plistPath),
+              let plist = try? PropertyListSerialization.propertyList(
+                  from: data, options: [], format: nil) as? [String: Any],
+              let args = plist["ProgramArguments"] as? [String]
+        else { return nil }
+        return args.first
+    }
+
+    /// Move Tokimon.app and the login item keeps pointing at where it used to
+    /// be — launchd then starts nothing at all, silently, and the pet just stops
+    /// showing up. Nothing surfaces that. So whenever the app runs from a new
+    /// location, it repoints its own login item; running from the new path at
+    /// least once is exactly what a user does after moving an app.
+    static func repairIfStale() {
+        guard isInstalled, !isTranslocated else { return }
+        let current = installedExecutable
+        guard current != targetExecutable else { return }
+        logLine("login item pointed at \(current ?? "nothing"); repointing to \(targetExecutable)")
+        uninstall()
+        install()
+    }
+
     static func install() {
-        let exe = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath().path
+        guard !isTranslocated else {
+            logLine("refusing to install a login item from a translocated path — "
+                    + "move Tokimon.app to /Applications and reopen it")
+            return
+        }
+        let exe = targetExecutable
         let plist: [String: Any] = [
             "Label": label,
             "ProgramArguments": [exe],

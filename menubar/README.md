@@ -34,6 +34,13 @@ To start it automatically, open the pet's menu and tick **Start at Login** —
 that writes `~/Library/LaunchAgents/com.jekleb.tokimon.menubar.plist`. Untick to
 remove it.
 
+Move `Tokimon.app` afterwards and the login item **repoints itself** the next
+time you open the app from its new location — otherwise launchd would go on
+starting a path that no longer exists, silently, and the pet would just stop
+showing up at login with nothing to explain why. (Repointing is skipped for an
+app running from Gatekeeper's read-only translocation mount, since that path
+vanishes on quit.)
+
 ## Menu
 
 | Item | What it does |
@@ -57,13 +64,19 @@ digimon_hook.py  ──writes──▶  ~/.claude/digimon/state.json
                             tokimon_feed.py  (JSON snapshot:
                               stage, level, XP, sprite rows,
                               prestige-shifted palette, live agents)
-                                        │  polled every 3s
+                                        │  polled every 10s idle / 2s training
                                   Tokimon.app  ──draws at 4 fps──▶  menu bar
 ```
 
-Two clocks on purpose: **data** is polled every few seconds (a subprocess),
-while the **animation** redraws from a wall-clock frame index — so the pet looks
-alive without spawning a process per frame.
+Two clocks on purpose: **data** is polled on a subprocess, while the
+**animation** redraws from a wall-clock frame index — so the pet looks alive
+without spawning a process per frame.
+
+The poll interval adapts: **10s when idle, 2s while a subagent is training**.
+Idle is where the day is spent, and each run costs a Python start plus a stat of
+every recent transcript, so a flat cadence spent most of its budget confirming
+nothing had changed — while being *less* responsive at the one moment worth
+watching.
 
 `tokimon_feed.py` also solves a problem the status line doesn't have: nothing
 hands the menu bar a `transcript_path`, because it lives outside any session. So
