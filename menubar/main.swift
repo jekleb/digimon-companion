@@ -22,6 +22,16 @@ struct StageInfo: Decodable {
     let stage: String
     let emoji: String
     let tagline: String
+    /// Name with the elemental epithet, e.g. "Starlit Omniloadmon". Optional so
+    /// an older engine copy without elements still decodes.
+    let title: String?
+}
+
+/// Elemental traits, precomputed by digimon_elements.summary — Swift only
+/// displays them. The sprite frames already wear the elements' particles.
+struct ElementInfo: Decodable {
+    let badge: String
+    let line: String
 }
 
 struct NextEvolution: Decodable {
@@ -65,11 +75,12 @@ struct Feed: Decodable {
     let spriteFPS: Double
     let palette: [String: String]
     let nextEvolution: NextEvolution?
+    let elements: ElementInfo?
     let training: [TrainingAgent]
     let errors24h: Int
 
     enum CodingKeys: String, CodingKey {
-        case ok, name, stage, level, cap, ceiling, progress, prestige, frames, palette, training
+        case ok, name, stage, level, cap, ceiling, progress, prestige, frames, palette, training, elements
         case spriteFPS = "sprite_fps"
         case maxedOut = "maxed_out"
         case tokensIntoLevel = "tokens_into_level"
@@ -291,6 +302,7 @@ final class DetailView: NSView {
         var height: CGFloat = 212
         guard let feed else { return height }
         if feed.nextEvolution != nil { height += 18 }
+        if !(feed.elements?.line ?? "").isEmpty { height += 18 }
         if feed.errors24h > 0 { height += 21 }
         if feed.isTraining { height += 26 + CGFloat(min(4, feed.training.count)) * 16 }
         if feed.maxedOut { height -= 16 }
@@ -328,7 +340,7 @@ final class DetailView: NSView {
         ty -= draw(title, at: NSPoint(x: textX, y: ty), width: textW,
                    font: .systemFont(ofSize: 15, weight: .bold), color: .labelColor)
         ty -= 2
-        ty -= draw("\(feed.stage.name) · \(feed.stage.stage)",
+        ty -= draw("\(feed.stage.title ?? feed.stage.name) · \(feed.stage.stage)",
                    at: NSPoint(x: textX, y: ty), width: textW,
                    font: .systemFont(ofSize: 12, weight: .medium), color: accent)
         ty -= 2
@@ -361,6 +373,12 @@ final class DetailView: NSView {
             y -= draw("\(next.emoji) \(next.name) at Lv.\(next.level) — \(formatInt(next.tokensAway)) tokens away",
                       at: NSPoint(x: pad, y: y), width: bounds.width - pad * 2,
                       font: .systemFont(ofSize: 11), color: .tertiaryLabelColor)
+        }
+
+        if let line = feed.elements?.line, !line.isEmpty {
+            y -= 6
+            y -= draw(line, at: NSPoint(x: pad, y: y), width: bounds.width - pad * 2,
+                      font: .systemFont(ofSize: 11, weight: .medium), color: accent)
         }
 
         // The engine logs its own failures to ~/.claude/digimon/error.log. The

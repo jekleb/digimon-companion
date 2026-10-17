@@ -61,7 +61,7 @@ echo "==> bundling the Python engine"
 # never display. Nothing inside an app bundle is protected.
 ENGINE="$APP/Contents/Resources/engine"
 mkdir -p "$ENGINE"
-for f in tokimon_feed.py digimon_lib.py digimon_agents.py digimon_sprites.py evolution_data.json; do
+for f in tokimon_feed.py digimon_lib.py digimon_agents.py digimon_sprites.py digimon_elements.py evolution_data.json; do
   cp "../$f" "$ENGINE/$f"
 done
 

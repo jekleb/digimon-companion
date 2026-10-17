@@ -884,5 +884,147 @@
     "p": "#b98bff",
     "G": "#ffcc33",
     "e": "#eafcff"
+  },
+  "elements": {
+    "astral": {
+      "name": "Astral",
+      "emoji": "\u2734\ufe0f",
+      "motif": "twinkle",
+      "epithet": "Starlit",
+      "attuned_epithet": "Star-Sworn",
+      "match": [
+        "cosmic_code"
+      ],
+      "colors": {
+        "a": "#fff3a8",
+        "A": "#c9a8ff"
+      },
+      "blurb": "Fed on space videos. Stars drift in the air around it."
+    },
+    "forge": {
+      "name": "Forge",
+      "emoji": "\ud83d\udd25",
+      "motif": "rise",
+      "epithet": "Blazing",
+      "attuned_epithet": "Forgeborn",
+      "match": [
+        "printing_3d",
+        "Lumalith3d",
+        "3D_Printing"
+      ],
+      "colors": {
+        "f": "#ff6a1a",
+        "F": "#ffd23f"
+      },
+      "blurb": "Fed on 3D-printing work. Embers rise off its back."
+    },
+    "prism": {
+      "name": "Prism",
+      "emoji": "\ud83c\udf08",
+      "motif": "prism",
+      "epithet": "Prismatic",
+      "attuned_epithet": "Spectral",
+      "match": [
+        "coloring_books"
+      ],
+      "colors": {
+        "q": "#ff5a8a",
+        "u": "#ffd23f",
+        "i": "#42e29b",
+        "j": "#5fb8ff"
+      },
+      "blurb": "Fed on coloring books. Rainbow flecks hang around it."
+    },
+    "verdant": {
+      "name": "Verdant",
+      "emoji": "\ud83c\udf3f",
+      "motif": "sprout",
+      "epithet": "Leafy",
+      "attuned_epithet": "Overgrown",
+      "match": [
+        "oak_canna",
+        "cannabis_consulting"
+      ],
+      "colors": {
+        "v": "#2fbf5b",
+        "V": "#a8f06a"
+      },
+      "blurb": "Fed on OAK Canna work. Leaves sprout from its head."
+    },
+    "volt": {
+      "name": "Volt",
+      "emoji": "\u26a1",
+      "motif": "spark",
+      "epithet": "Crackling",
+      "attuned_epithet": "Stormbound",
+      "match": [
+        "trading",
+        "digimon-companion"
+      ],
+      "colors": {
+        "z": "#fff04a",
+        "Z": "#7af3ff"
+      },
+      "blurb": "Fed on code and markets. Sparks jump off its sides."
+    },
+    "tide": {
+      "name": "Tide",
+      "emoji": "\ud83c\udf0a",
+      "motif": "drip",
+      "epithet": "Tidal",
+      "attuned_epithet": "Deepwater",
+      "match": [
+        "ambient_audio"
+      ],
+      "colors": {
+        "t": "#2f8bff",
+        "T": "#9fe6ff"
+      },
+      "blurb": "Fed on sleep-sound albums. Water beads down its sides."
+    },
+    "crystal": {
+      "name": "Crystal",
+      "emoji": "\ud83d\udc8e",
+      "motif": "shard",
+      "epithet": "Gleaming",
+      "attuned_epithet": "Crystalline",
+      "match": [
+        "ThriveMade",
+        "thrivemade"
+      ],
+      "colors": {
+        "h": "#5fe6ff",
+        "H": "#ffffff"
+      },
+      "blurb": "Fed on the ThriveMade shop. Shards of crystal float nearby."
+    },
+    "gale": {
+      "name": "Gale",
+      "emoji": "\ud83c\udf2a\ufe0f",
+      "motif": "gust",
+      "epithet": "Windswept",
+      "attuned_epithet": "Galeborn",
+      "match": [
+        "ekleberry"
+      ],
+      "colors": {
+        "l": "#9dffcf",
+        "L": "#3fbf8f"
+      },
+      "blurb": "Fed on Fiverr writing. Gusts of wind stream past it."
+    },
+    "aether": {
+      "name": "Aether",
+      "emoji": "\ud83e\udee7",
+      "motif": "twinkle",
+      "epithet": "Hazy",
+      "attuned_epithet": "Aetheric",
+      "match": [],
+      "colors": {
+        "x": "#f3c6ff",
+        "X": "#a77bd6"
+      },
+      "blurb": "Everything else. Only wins a stage when no project work fed it."
+    }
   }
 }

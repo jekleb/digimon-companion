@@ -7,6 +7,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import digimon_lib as dl
 import digimon_agents as da
+import digimon_elements as el
 import digimon_sprites as sprites
 
 
@@ -24,6 +25,14 @@ def _sprite_lines(stage, data, prestige=0):
     )
 
 
+def _dressed_lines(stage, data, traits, prestige=0, frame=0):
+    """The stage sprite wearing the pet's elemental traits, rendered for the terminal."""
+    rows, pal = el.dress(stage, data, traits, prestige, frame)
+    if not rows:
+        return list(stage.get("art") or [])
+    return sprites.render_sprite(rows, pal, color=sprites.supports_color(sys.stdout))
+
+
 def cmd_status():
     state = dl.load_state()
     data = dl.load_evolution_data()
@@ -37,11 +46,13 @@ def cmd_status():
     star = dl.prestige_badge(prestige)
     level_str = f"MAX ({ceiling})" if snap["maxed_out"] else f"{snap['level']} / {snap['cap']}"
     print()
-    title = f"   {stage['emoji']} {star}  {state.get('name', dl.DEFAULT_NAME)}  —  {stage['name']} ({stage['stage']})"
+    elem = el.summary(state, data)
+    title = (f"   {stage['emoji']} {star}  {state.get('name', dl.DEFAULT_NAME)}  —  "
+             f"{el.title(stage, elem['_traits'], data.get('elements') or {})} ({stage['stage']})")
     print(title)
     print(f"   \"{stage['tagline']}\"")
     print()
-    art = _sprite_lines(stage, data, prestige)
+    art = _dressed_lines(stage, data, elem["_traits"], prestige)
     if art:
         print_art(art)
     print(f"   Level:        {level_str}")
@@ -55,6 +66,8 @@ def cmd_status():
         print(f"   Prestige:     {star}  (rank {prestige}, +{int(round(snap['growth_bonus'] * 100))}% growth)")
     print(f"   Total tokens: {dl.format_int(snap['total_tokens'])} lifetime")
     print(f"   Cap tiers:    {' -> '.join(str(c) for c in cap_tiers)}")
+    if elem["line"]:
+        print(f"   Elements:     {elem['line']}   (`digimon_cli.py elements`)")
     print()
 
     recent_errors = dl.recent_error_count(within_hours=24)
@@ -200,6 +213,14 @@ def cmd_doctor():
               f"{len(data.get('palette', {}))}-color palette)")
     ok = ok and sprite_ok
 
+    try:
+        el.validate_elements(data)
+    except Exception as e:
+        print(f"   ✗ elemental traits failed validation: {e}")
+        ok = False
+    else:
+        print(f"   ✓ elemental traits valid ({len(data.get('elements', {}))} elements)")
+
     here = os.path.dirname(os.path.abspath(__file__))
     hook_path = os.path.join(here, "digimon_hook.py")
     try:
@@ -333,6 +354,69 @@ def cmd_live(sim_agent=None):
         sys.stdout.write("\n")
 
 
+def cmd_elements():
+    state = dl.load_state()
+    data = dl.load_evolution_data()
+    elements = data.get("elements") or {}
+    snap = dl.snapshot_from_state(state, data)
+    elem = el.summary(state, data)
+    print()
+    print(f"   {el.title(snap['stage'], elem['_traits'], elements)} — elemental traits")
+    print()
+    art = _dressed_lines(snap["stage"], data, elem["_traits"], snap.get("prestige", 0))
+    if art:
+        print_art(art)
+    if elem["traits"]:
+        print("   This life:")
+        for t in elem["_traits"]:
+            spec = elements[t["element"]]
+            how = "chosen" if t.get("chosen") else ("inherited" if t.get("stage") == "Inherited" else "fed")
+            print(f"     {spec['emoji']} {spec['name']:8}  from {t.get('stage', '?'):13} ({how})")
+        print()
+    if elem["leaning"] or elem["attune"]:
+        print(f"   Next trait:   {elem['line'].split(' · ')[-1]}")
+        nxt = [s for s in data["stages"] if s["min"] > snap["level"]]
+        if nxt:
+            print(f"                 banked when it evolves into {nxt[0]['emoji']} {nxt[0]['name']} (Lv.{nxt[0]['min']})")
+        print()
+    life = elem["lifetime"]
+    total = sum(life.values()) or 1
+    print("   Element         fed (lifetime)   look")
+    for k, spec in elements.items():
+        n = life.get(k, 0)
+        mark = "  ◄ chosen next" if elem["attune"] == k else ""
+        print(f"   {spec['emoji']} {spec['name']:10} {dl.human_tokens(n):>8} {n / total * 100:4.0f}%   {spec['blurb']}{mark}")
+    print()
+    print("   Steer the next evolution:  digimon_cli.py attune <element>   (or `attune off`)")
+    print()
+
+
+def cmd_attune(choice):
+    data = dl.load_evolution_data()
+    elements = data.get("elements") or {}
+    choice = choice.lower()
+    if choice not in elements and choice not in ("off", "none", "auto"):
+        print(f"Unknown element {choice!r}. Pick one of: {', '.join(elements)} (or off)")
+        return 1
+    lock = dl.acquire_lock()
+    try:
+        state = dl.load_state()
+        el.seed_from_history(state, elements)
+        if choice in elements:
+            state["attune"] = choice
+        else:
+            state.pop("attune", None)
+        dl.save_state(state)
+    finally:
+        lock.close()
+    if choice in elements:
+        spec = elements[choice]
+        print(f"{spec['emoji']} {state.get('name', dl.DEFAULT_NAME)} will take a {spec['name']} trait at its next evolution.")
+    else:
+        print("Choice cleared — the next trait goes to whatever it is fed most.")
+    return 0
+
+
 def cmd_rename(new_name):
     lock = dl.acquire_lock()
     try:
@@ -363,11 +447,16 @@ def main():
         cmd_agents()
     elif args[0] == "live":
         cmd_live(args[1] if len(args) > 1 else None)
+    elif args[0] == "elements":
+        cmd_elements()
+    elif args[0] == "attune" and len(args) > 1:
+        sys.exit(cmd_attune(args[1]))
     elif args[0] == "rename" and len(args) > 1:
         cmd_rename(" ".join(args[1:]))
     else:
         print("Usage: digimon_cli.py "
-              "[status|history|gallery|sessions|agents|bar|live [agent]|doctor|rename <name>]")
+              "[status|history|gallery|sessions|agents|bar|live [agent]|elements|attune <element|off>|"
+              "doctor|rename <name>]")
 
 
 if __name__ == "__main__":

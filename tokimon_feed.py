@@ -26,6 +26,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import digimon_lib as dl
 import digimon_agents as da
+import digimon_elements as el
 import digimon_sprites as sprites
 
 PROJECTS_DIR = os.path.expanduser("~/.claude/projects")
@@ -108,7 +109,11 @@ def build_feed(now=None):
 
     # Hand Swift the already-recolored palette so the shiny hue rotation lives
     # in one place; Swift just fills rects with the hexes it is given.
-    palette = sprites.shiny_palette(data.get("palette") or {}, prestige)
+    # Elements: frames come back already wearing their particles/outline, and
+    # the palette carries the element colours on top of the shiny rotation.
+    elem = el.summary(state, data)
+    traits = elem.pop("_traits")
+    frames, palette = el.dressed_frames(stage, data, traits, prestige)
     active = active_agents(now=now)
 
     return {
@@ -120,6 +125,7 @@ def build_feed(now=None):
             "stage": stage["stage"],
             "emoji": stage["emoji"],
             "tagline": stage.get("tagline", ""),
+            "title": el.title(stage, traits, data.get("elements") or {}),
         },
         "level": snap["level"],
         "cap": snap["cap"],
@@ -134,10 +140,11 @@ def build_feed(now=None):
         "total_tokens_human": dl.human_tokens(snap["total_tokens"]),
         # Always a LIST OF FRAMES, even for a single-frame stage, so the Swift
         # side has one shape to decode and animates without special cases.
-        "frames": sprites.sprite_frames(stage),
+        "frames": frames,
         "palette": {k: v for k, v in palette.items() if v},
         "sprite_fps": sprites.SPRITE_FPS_TRAINING if active else sprites.SPRITE_FPS_IDLE,
         "next_evolution": next_evolution(snap, data),
+        "elements": elem,
         "training": active,
         "errors_24h": dl.recent_error_count(within_hours=24),
     }
