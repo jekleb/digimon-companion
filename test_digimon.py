@@ -12,6 +12,7 @@ import digimon_lib as dl
 import digimon_hook as dh
 import digimon_agents as da
 import digimon_sprites as sprites
+import digimon_elements as el
 import tokimon_feed as feed
 import tokimon_serve as serve
 
@@ -496,8 +497,11 @@ def test_feed_prestige_recolor_matches_sprites_module():
     payload = feed.build_feed()
     data = dl.load_evolution_data()
     expected = sprites.shiny_palette(data["palette"], payload["prestige"])
+    element_colors = {k: v for spec in data["elements"].values() for k, v in spec["colors"].items()}
     check("feed palette is the shiny palette for the current prestige",
-          all(payload["palette"][k] == expected[k] for k in payload["palette"]))
+          all(payload["palette"][k] == expected[k] for k in payload["palette"] if k in expected))
+    check("element colours are NOT hue-rotated by prestige (Forge stays orange)",
+          all(payload["palette"][k] == v for k, v in element_colors.items()))
 
 
 def test_feed_next_evolution_agrees_with_the_stage_table():
@@ -663,6 +667,207 @@ def test_serve_cache_collapses_rapid_polls():
         check("the cache does expire", len(calls) == 2)
     finally:
         feed.build_feed = real
+
+
+# ------------------------------------------------------------------------
+# Elemental traits
+# ------------------------------------------------------------------------
+def _traits(*keys):
+    return [{"element": k} for k in keys]
+
+
+def test_validate_elements_accepts_real_file():
+    el.validate_elements(dl.load_evolution_data())
+    check("real elements table validates", True)
+
+
+def test_validate_elements_catches_key_collision():
+    data = json.loads(json.dumps(dl.load_evolution_data()))
+    data["elements"]["forge"]["colors"] = {"K": "#ff0000"}   # K is the outline
+    try:
+        el.validate_elements(data)
+        check("colliding colour key is rejected", False)
+    except ValueError as e:
+        check("colliding colour key is rejected", "already used" in str(e))
+
+
+def test_element_for_cwd_matches_path_components():
+    els = dl.load_evolution_data()["elements"]
+    root = "/Users/x/Documents/Claude"
+    check("cosmic_code -> astral", el.element_for_cwd(root + "/cosmic_code/videos", els) == "astral")
+    check("printing_3d -> forge", el.element_for_cwd(root + "/printing_3d", els) == "forge")
+    check("workspace root -> neutral aether", el.element_for_cwd(root, els) == "aether")
+    check("empty cwd -> aether", el.element_for_cwd("", els) == "aether")
+    check("substring is not a match (cosmic_codex)",
+          el.element_for_cwd(root + "/cosmic_codex", els) == "aether")
+
+
+def test_dominant_element_prefers_real_work_over_neutral():
+    check("real element beats a bigger aether pile",
+          el.dominant_element({"aether": 10_000, "forge": 5}) == "forge")
+    check("aether wins only when alone", el.dominant_element({"aether": 3}) == "aether")
+    check("empty tally -> None", el.dominant_element({}) is None)
+
+
+def test_gain_trait_uses_tally_then_attune_choice():
+    state = {}
+    el.credit(state, "forge", 100)
+    el.credit(state, "tide", 60)
+    trait, runner = el.gain_trait(state, "Bytemon", 16)
+    check("trait goes to the element fed most", trait["element"] == "forge" and not trait["chosen"])
+    check("runner-up is surfaced", runner == "tide")
+    check("stage tally resets after a trait", state["stage_element_xp"] == {})
+    check("lifetime tally keeps counting", state["element_xp"] == {"forge": 100, "tide": 60})
+    el.credit(state, "forge", 999)
+    state["attune"] = "gale"
+    trait, _ = el.gain_trait(state, "Cachemon", 31)
+    check("an attune choice overrides the tally", trait["element"] == "gale" and trait["chosen"])
+    check("the choice is consumed", "attune" not in state)
+    check("traits stack across the life", [t["element"] for t in state["traits"]] == ["forge", "gale"])
+
+
+def test_rebirth_inherits_strongest_element():
+    state = {"traits": _traits("tide", "forge", "forge", "tide", "forge")}
+    inherited = el.inherit_on_rebirth(state, 2)
+    check("strongest element is inherited", inherited == "forge")
+    check("new life starts with exactly the inherited trait",
+          [t["element"] for t in state["traits"]] == ["forge"])
+    check("old life is archived in the lineage", len(state["lineage"][0]["traits"]) == 5)
+
+
+def test_ranked_elements_ties_break_to_most_recent():
+    check("tie goes to the most recent", el.ranked_elements(_traits("forge", "tide"))[0] == "tide")
+    check("count beats recency", el.ranked_elements(_traits("forge", "forge", "tide"))[0] == "forge")
+
+
+def test_seed_from_history_is_idempotent_and_ignores_aether_for_the_first_trait():
+    state = {"sessions_seen": {
+        "/a.jsonl": {"cwd": "/w/Claude", "tokens": 900},
+        "/b.jsonl": {"cwd": "/w/Claude/cosmic_code", "tokens": 100},
+    }}
+    els = dl.load_evolution_data()["elements"]
+    check("seeds a pre-elements pet", el.seed_from_history(state, els))
+    check("lifetime tally rebuilt from session cwds",
+          state["element_xp"] == {"aether": 900, "astral": 100})
+    check("first trait is the strongest REAL element", state["traits"][0]["element"] == "astral")
+    check("second call is a no-op", not el.seed_from_history(state, els))
+
+
+def test_dress_never_paints_over_the_body():
+    data = dl.load_evolution_data()
+    pal = data["palette"]
+    for s in data["stages"]:
+        for f, frame in enumerate(sprites.sprite_frames(s)):
+            for key in data["elements"]:
+                dressed, _ = el.dress(s, data, _traits(key, key, key), 0, f)
+                body_changed = any(
+                    pal.get(frame[y][x]) and dressed[y][x] != frame[y][x]
+                    for y in range(len(frame)) for x in range(len(frame[0])))
+                if body_changed:
+                    check(f"{s['name']} f{f} {key}: particles stay off the body", False)
+    check("below attunement, particles only ever land on transparent pixels", True)
+
+
+def test_dress_attuned_only_recolours_outline():
+    data = dl.load_evolution_data()
+    pal = data["palette"]
+    s = data["stages"][2]
+    frame = sprites.sprite_frames(s)[0]
+    dressed, _ = el.dress(s, data, _traits(*["forge"] * el.ATTUNED_AT), 0, 0)
+    changed = [frame[y][x] for y in range(16) for x in range(16)
+               if pal.get(frame[y][x]) and dressed[y][x] != frame[y][x]]
+    check("attuned pet's outline takes the element colour", len(changed) > 0)
+    check("only outline (K) pixels are recoloured", set(changed) == {"K"})
+
+
+def test_dress_grows_with_traits():
+    data = dl.load_evolution_data()
+    s = next(x for x in data["stages"] if x["name"] == "Bitmon")
+    frame = sprites.sprite_frames(s)[0]
+
+    def painted(traits):
+        d, _ = el.dress(s, data, traits, 0, 0)
+        return sum(1 for y in range(16) for x in range(16) if d[y][x] != frame[y][x])
+
+    one, three = painted(_traits("forge")), painted(_traits("forge", "forge", "forge"))
+    check("no traits = untouched sprite", painted([]) == 0)
+    check("more traits = more elemental pixels", 0 < one < three)
+    check("a second element adds its own particles",
+          painted(_traits("forge", "forge", "tide")) > painted(_traits("forge", "forge")))
+
+
+def test_dressed_frames_keep_frame_count_and_resolve_every_glyph():
+    data = dl.load_evolution_data()
+    for s in data["stages"]:
+        frames, pal = el.dressed_frames(s, data, _traits("prism", "volt"), 3)
+        check(f"{s['name']} keeps its frame count", len(frames) == len(sprites.sprite_frames(s)))
+        used = set("".join("".join(f) for f in frames))
+        check(f"{s['name']} every dressed glyph resolves", not (used - set(pal) - set(". ")))
+
+
+def test_title_and_badge():
+    data = dl.load_evolution_data()
+    s = data["stages"][3]
+    els = data["elements"]
+    check("no traits = plain name", el.title(s, [], els) == s["name"])
+    check("epithet from the primary element",
+          el.title(s, _traits("forge"), els) == f"Blazing {s['name']}")
+    check("attuned epithet at ATTUNED_AT traits",
+          el.title(s, _traits(*["forge"] * el.ATTUNED_AT), els) == f"Forgeborn {s['name']}")
+    check("badge lists elements strongest first", el.badge(_traits("tide", "forge", "forge"), els) == "🔥🌊")
+
+
+def test_summary_does_not_mutate_a_pre_elements_state():
+    state = {"sessions_seen": {"/a.jsonl": {"cwd": "/w/cosmic_code", "tokens": 5}}}
+    out = el.summary(state, dl.load_evolution_data())
+    check("summary shows the seeded trait", out["badge"] == "✴️")
+    check("viewer did not write to the state", "element_xp" not in state)
+
+
+def test_hook_credits_element_and_banks_trait_on_evolution():
+    """Real hook, temp state: a cosmic_code session that crosses a stage boundary
+    must credit Astral and bank an Astral trait, and say so."""
+    import io
+    import contextlib
+    with tempfile.TemporaryDirectory() as d:
+        saved = (dl.DIGIMON_DIR, dl.STATE_PATH, dl.LOCK_PATH, dl.ERROR_LOG_PATH)
+        dl.DIGIMON_DIR = d
+        dl.STATE_PATH = os.path.join(d, "state.json")
+        dl.LOCK_PATH = os.path.join(d, "state.lock")
+        dl.ERROR_LOG_PATH = os.path.join(d, "error.log")
+        try:
+            data = dl.load_evolution_data()
+            need = int(dl.tokens_for_level(7, data["curve"]))   # Egg -> past Bitmon into Bytemon
+            proj = os.path.join(d, "cosmic_code")
+            os.makedirs(proj)
+            tp = os.path.join(d, "t.jsonl")
+            with open(tp, "wb") as f:
+                f.write(('{"type":"assistant","message":{"usage":{"input_tokens":0,'
+                         '"output_tokens":%d}}}\n' % need).encode())
+            saved_stdin = sys.stdin
+            sys.stdin = io.StringIO(json.dumps({"transcript_path": tp, "cwd": proj}))
+            buf = io.StringIO()
+            try:
+                with contextlib.redirect_stdout(buf):
+                    dh.main()
+            finally:
+                sys.stdin = saved_stdin
+            state = dl.load_state()
+            check("tokens credited to astral", state["element_xp"].get("astral") == need)
+            check("an astral trait was banked on evolving",
+                  [t["element"] for t in state.get("traits", [])] == ["astral"])
+            check("the evolution message announces the trait", "Astral trait" in buf.getvalue())
+            check("no errors logged", not os.path.exists(dl.ERROR_LOG_PATH))
+        finally:
+            dl.DIGIMON_DIR, dl.STATE_PATH, dl.LOCK_PATH, dl.ERROR_LOG_PATH = saved
+
+
+def test_feed_carries_elements_block():
+    payload = feed.build_feed()
+    e = payload["elements"]
+    check("feed has an elements block", {"traits", "badge", "line", "leaning", "attune"} <= set(e))
+    check("raw trait list is not leaked into the feed", "_traits" not in e)
+    check("stage carries a display title", isinstance(payload["stage"].get("title"), str))
 
 
 def main():

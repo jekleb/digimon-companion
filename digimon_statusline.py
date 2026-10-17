@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import digimon_lib as dl
 import digimon_agents as da
 import digimon_sprites as sprites
+import digimon_elements as el
 
 
 def render(payload):
@@ -25,9 +26,14 @@ def render(payload):
 
     transcript_path = payload.get("transcript_path") if isinstance(payload, dict) else None
     active = da.detect_active_agents(transcript_path)
+    try:
+        badge = el.summary(state, data)["badge"]
+    except Exception:
+        dl.log_error("digimon_statusline.elements")  # cosmetic — never blank the bar
+        badge = ""
     if active:
-        return sprites.training_line(name, snap, active, t)
-    return sprites.idle_line(name, snap, t)
+        return sprites.training_line(name, snap, active, t, badge)
+    return sprites.idle_line(name, snap, t, badge)
 
 
 def main():

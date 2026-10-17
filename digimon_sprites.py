@@ -196,14 +196,15 @@ def level_label(snap, short=False):
     return f"Lv.{snap['level']}/{snap['cap']}"
 
 
-def idle_line(name, snap, t):
-    """Compact resting readout for the status bar (single line, no newline)."""
+def idle_line(name, snap, t, elem_badge=""):
+    """Compact resting readout for the status bar (single line, no newline).
+    `elem_badge` is the pet's elemental-trait emoji run (digimon_elements.badge)."""
     stage = snap["stage"]
     aura = IDLE_AURA[frame_index(t, len(IDLE_AURA))]
     bar = shimmer_bar(snap["level_progress_frac"], 10, t)
     star = dl.prestige_badge(snap.get("prestige", 0))
     return (
-        f"{stage['emoji']}{star}{aura} {name} · {stage['name']} {level_label(snap)} "
+        f"{stage['emoji']}{star}{elem_badge}{aura} {name} · {stage['name']} {level_label(snap)} "
         f"[{bar}] {dl.human_tokens(snap['total_tokens'])} tok"
     )
 
@@ -217,7 +218,7 @@ def _elapsed_str(started, t):
     return f"{secs // 60}m"
 
 
-def training_line(name, snap, active, t):
+def training_line(name, snap, active, t, elem_badge=""):
     """Status-bar line shown while ≥1 subagent is running: the pet is sparring
     with the newest agent; extra concurrent agents are summarised as '+N'."""
     lead = active[0]
@@ -229,7 +230,7 @@ def training_line(name, snap, active, t):
     tail = f" ⏱{elapsed}" if elapsed else ""
     star = dl.prestige_badge(snap.get("prestige", 0))
     return (
-        f"{snap['stage']['emoji']}{star}{clash}{emoji} {name} training w/ {label}{extra} "
+        f"{snap['stage']['emoji']}{star}{elem_badge}{clash}{emoji} {name} training w/ {label}{extra} "
         f"· {level_label(snap, short=True)} [{bar}]{tail}"
     )
 

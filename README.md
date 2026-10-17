@@ -99,7 +99,9 @@ python3 digimon_cli.py <command>
 | `agents` | The subagent → icon/label map + who's training now |
 | `bar` | Preview one frame of the exact status-bar line |
 | `live [agent]` | Full-screen animated scene (`live cosmic-code` simulates a training session) |
-| `doctor` | Self-check: hooks wired, data valid, sprites valid, scripts run |
+| `elements` | Elemental traits this life, what it's feeding on now, lifetime element split |
+| `attune <element\|off>` | Choose the element of the next trait (overrides "fed most") |
+| `doctor` | Self-check: hooks wired, data valid, sprites valid, elements valid, scripts run |
 | `rename <name>` | Rename your companion |
 
 ---
@@ -166,6 +168,42 @@ A few design notes:
 | 15 | Aeon | ♾️ Aeonmon | 701–750 → **rebirth** |
 
 Reach Lv.750 and the loop begins again, one prestige rank higher.
+
+---
+
+## Elemental traits
+
+The pet takes on the element of whatever you feed it. Each turn's tokens are
+credited to an element picked from the session's folder:
+
+| Element | Fed by | Look |
+|---|---|---|
+| ✴️ Astral | `cosmic_code` | stars drift in the air around it |
+| 🔥 Forge | `printing_3d` | embers rise off its back |
+| 🌈 Prism | `coloring_books` | rainbow flecks |
+| 🌿 Verdant | `oak_canna`, `cannabis_consulting` | leaves sprout from its head |
+| ⚡ Volt | `trading`, `digimon-companion` | sparks jump off its sides |
+| 🌊 Tide | `ambient_audio` | water beads down its sides |
+| 💎 Crystal | `ThriveMade` | floating crystal shards |
+| 🌪️ Gale | `ekleberry` | wind streams past it |
+| 🫧 Aether | anything else | soft haze. Only wins a stage when no project work fed it |
+
+- **Every evolution banks one trait**: the element fed most during the stage
+  it's leaving. **You can choose instead** with `digimon_cli.py attune <element>`.
+  The evolution message names the runner-up so you know the choice was there.
+- **Traits stack and the look grows**: 1 trait = a few sparkles; more traits
+  = more particles; a second element adds its own; **4 of one element =
+  attuned**, so the outline itself turns that colour and the name takes the
+  attuned epithet (*Blazing* → *Forgeborn*).
+- **Rebirth inherits the bloodline**: the life's strongest element becomes
+  the new Egg's first trait.
+- **Cosmetic only.** Traits never change XP. Particles only land on
+  transparent pixels, so they can't damage the creature art, and element
+  colours stay fixed across prestige hue shifts (Forge is orange in every life).
+![Each element (rows) growing from 0 to 4 traits, then attuned on two later stages](tools/elements_showcase.png)
+
+- Add or retune elements in `evolution_data.json` → `elements`. Check the art with
+  `python3 tools/contact_sheet.py out.png --elements`, then **look at the PNG**.
 
 ---
 

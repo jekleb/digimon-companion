@@ -9,6 +9,7 @@ import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import digimon_lib as dl
+import digimon_elements as el
 
 
 def sum_usage_tokens(raw_bytes):
@@ -89,7 +90,8 @@ def main():
     cwd = hook_input.get("cwd", "")
 
     lock = dl.acquire_lock()
-    evolved = False
+    evolved = rebirthed = False
+    elements, inherited, trait, runner_up = {}, None, None, None
     try:
         state = dl.load_state()
         data = dl.load_evolution_data()
@@ -97,6 +99,13 @@ def main():
 
         sessions_seen = state.setdefault("sessions_seen", {})
         prune_missing_sessions(sessions_seen)
+
+        # Backfill a pre-elements pet from session history BEFORE this turn's
+        # tokens land in sessions_seen, or they would be counted twice.
+        try:
+            el.seed_from_history(state, data.get("elements") or {})
+        except Exception:
+            dl.log_error("digimon_hook.elements.seed")
 
         prev = sessions_seen.get(transcript_path, {"offset": 0, "tokens": 0})
         prev_offset = prev.get("offset", 0) if isinstance(prev, dict) else 0
@@ -116,6 +125,16 @@ def main():
 
         prestige = state.get("prestige", 0)
         baseline = state.get("rebirth_baseline", 0)
+
+        # Elemental traits: credit this turn's tokens to the folder's element.
+        # Cosmetic only — wrapped so an element bug can never stop XP counting.
+        element = None
+        try:
+            elements = data.get("elements") or {}
+            element = el.element_for_cwd(sessions_seen[transcript_path]["cwd"], elements)
+            el.credit(state, element, delta)
+        except Exception:
+            dl.log_error("digimon_hook.elements.credit")
 
         before = dl.compute_snapshot(state.get("total_tokens", 0), data, prestige, baseline)
         state["total_tokens"] = state.get("total_tokens", 0) + delta
@@ -141,9 +160,19 @@ def main():
             )
             after = dl.compute_snapshot(state["total_tokens"], data, prestige, baseline)
             rebirthed = True
+            inherited = None
+            try:
+                inherited = el.inherit_on_rebirth(state, prestige)
+            except Exception:
+                dl.log_error("digimon_hook.elements.rebirth")
 
         evolved = (not rebirthed) and after["stage"]["name"] != before["stage"]["name"]
+        trait, runner_up = None, None
         if evolved:
+            try:
+                trait, runner_up = el.gain_trait(state, before["stage"]["name"], after["level"])
+            except Exception:
+                dl.log_error("digimon_hook.elements.trait")
             state.setdefault("evolution_history", []).append(
                 {
                     "stage": after["stage"]["stage"],
@@ -168,6 +197,9 @@ def main():
             f"{after['stage']['emoji']} {after['stage']['name']} — "
             f"Prestige {stars} (+{growth_pct}% growth)"
         )
+        if inherited and inherited in elements:
+            spec = elements[inherited]
+            msg += f" · inherits {spec['emoji']} {spec['name']}"
         print(json.dumps({"systemMessage": msg}))
     elif evolved:
         msg = (
@@ -175,6 +207,14 @@ def main():
             f"-> {after['stage']['emoji']} {after['stage']['name']} ({after['stage']['stage']}, "
             f"Lv.{after['level']}/{after['cap']})"
         )
+        if trait and trait["element"] in elements:
+            spec = elements[trait["element"]]
+            how = "chosen" if trait["chosen"] else "fed most"
+            msg += f" · gained {spec['emoji']} {spec['name']} trait ({how})"
+            if runner_up and runner_up in elements and runner_up != trait["element"]:
+                alt = elements[runner_up]
+                msg += (f" · {alt['emoji']} {alt['name']} was close — "
+                        f"`digimon_cli.py attune {runner_up}` to steer the next one")
         print(json.dumps({"systemMessage": msg}))
 
 
