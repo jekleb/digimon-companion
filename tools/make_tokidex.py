@@ -16,16 +16,63 @@ along — a bare publish of this file mints a new one:
 Values mirrored from the engine (keep them in step by hand if they move):
 SPRITE_FPS_IDLE, PRESTIGE_BOOST, SHINY_HUE_STEP, and the AGENT_STYLES roster,
 all from digimon_sprites / digimon_lib.
+
+The Elements section is NOT mirrored: its sprites are dressed here by the real
+digimon_elements.dress(), and the rule numbers (ATTUNED_AT, particle counts)
+are read off that module.
 """
 import json
 import os
 import pathlib
+import sys
 
 HERE = pathlib.Path(os.path.dirname(os.path.abspath(__file__)))
 REPO = HERE.parent
 OUT = HERE / "tokidex.html"
+sys.path.insert(0, str(REPO))
+
+import digimon_elements as el  # noqa: E402
 
 data = json.loads((REPO / "evolution_data.json").read_text())
+
+# Stages each element is shown dressed on: an early, roomy body and the dense
+# Sovereign the live pet is wearing now (crowded sprites take the halo fallback).
+SHOWCASE_STAGES = ("Tensormon", "Omniloadmon")
+SHOWCASE_COUNTS = range(1, el.ATTUNED_AT + 1)
+
+
+def element_showcase():
+    """Per element: its table entry plus every showcase stage dressed at 1..ATTUNED_AT
+    traits, both animation frames, at prestige 0 (the page re-applies the shiny
+    rotation underneath the element colours, as dress() does)."""
+    by_name = {s["name"]: s for s in data["stages"]}
+    missing = [n for n in SHOWCASE_STAGES if n not in by_name]
+    if missing:
+        raise SystemExit(f"SHOWCASE_STAGES not in evolution_data.json: {missing}")
+    out = []
+    for key, spec in data["elements"].items():
+        rows = []
+        for name in SHOWCASE_STAGES:
+            stage = by_name[name]
+            cells = []
+            for n in SHOWCASE_COUNTS:
+                traits = [{"element": key}] * n
+                frames, _ = el.dressed_frames(stage, data, traits)
+                cells.append({"n": n, "title": el.title(stage, traits, data["elements"]),
+                              "frames": frames})
+            rows.append({"stage": name, "cells": cells})
+        # Matching is case-insensitive, so "ThriveMade"/"thrivemade" is one folder.
+        folders = {}
+        for m in spec.get("match", []):
+            folders.setdefault(m.lower(), m)
+        out.append({
+            "key": key,
+            **{k: spec.get(k) for k in ("name", "emoji", "epithet", "attuned_epithet", "blurb", "colors")},
+            "match": list(folders.values()),
+            "rows": rows,
+        })
+    return out
+
 
 # Only what the page draws — keeps the payload lean (the ASCII `art` fallback
 # and the level curve are engine-side concerns).
@@ -36,10 +83,19 @@ slim = {
         {k: s[k] for k in ("name", "stage", "emoji", "tagline", "min", "max", "sprite")}
         for s in data["stages"]
     ],
+    "elements": element_showcase(),
+    "rules": {
+        "attuned_at": el.ATTUNED_AT,
+        "primary": el.PRIMARY_PARTICLES,
+        "secondary": el.SECONDARY_PARTICLES,
+        "neutral": el.NEUTRAL_ELEMENT,
+    },
 }
 payload = json.dumps(slim, ensure_ascii=False, separators=(",", ":"))
 
-HTML = """<title>TOKIDEX — 8-bit Companion</title>
+HTML = """<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOKIDEX — 8-bit Companion</title>
 <style>
   :root{
     --ground:#0e1120; --panel:#161a2e; --panel-2:#1c2138; --edge:#2a3150;
@@ -166,6 +222,36 @@ HTML = """<title>TOKIDEX — 8-bit Companion</title>
   .lvl{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px;font-variant-numeric:tabular-nums;letter-spacing:.05em}
   .tag{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.45}
 
+  /* ---- elements ---- */
+  .lede{color:var(--muted);font-size:14px;margin:-4px 2px 16px;max-width:760px}
+  .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:10px;margin-bottom:18px}
+  .rulecard{border:1px solid var(--edge);border-radius:11px;padding:12px 14px;background:#ffffff05}
+  .rulecard .rt{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+  .rulecard .rd{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.45}
+  .rulecard code,.feeds code{font-family:var(--mono);font-size:11.5px;color:var(--ink);background:#ffffff0d;border:1px solid #ffffff14;border-radius:5px;padding:1px 5px}
+  .egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:14px}
+  .ecard{
+    border:1px solid var(--edge);border-top:3px solid var(--accent);border-radius:14px;
+    background:linear-gradient(180deg,var(--panel),#12162a);padding:14px 16px 12px;
+  }
+  .ehead{display:flex;align-items:center;gap:8px}
+  .eemoji{font-size:18px}
+  .ename{font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:.04em}
+  .swatches{margin-left:auto;display:flex;gap:4px}
+  .swatches i{width:11px;height:11px;border-radius:3px;border:1px solid #ffffff22;display:block}
+  .epi{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:4px;letter-spacing:.03em}
+  .epi b{color:var(--accent)}
+  .feeds{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.9}
+  .blurb{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+  .erow{margin-top:12px}
+  .erow .rl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim2);margin-bottom:5px}
+  .ecells{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .ecell{display:flex;flex-direction:column;align-items:center;gap:4px;border-radius:9px;padding:6px 0 5px;background:#080a1699;border:1px solid #ffffff08}
+  .ecell.attuned{border-color:var(--accent);box-shadow:0 0 14px -6px var(--accent)}
+  .ecell canvas{width:64px;height:64px}
+  .ecell .n{font-family:var(--mono);font-size:10px;color:var(--dim2);letter-spacing:.06em}
+  .ecell.attuned .n{color:var(--accent)}
+
   footer{margin-top:34px;color:var(--dim2);font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-align:center;line-height:1.9}
   footer b{color:var(--muted)}
   @media (prefers-reduced-motion: reduce){ .bob{animation:none} }
@@ -212,6 +298,16 @@ HTML = """<title>TOKIDEX — 8-bit Companion</title>
   </div>
   <div class="grid" id="grid"></div>
 
+  <div class="sectionhead">
+    <h2>Elements</h2>
+    <div class="rule"></div>
+  </div>
+  <p class="lede">The pet takes on the element of the work it is fed. Every project folder feeds one
+    element; each evolution banks one trait, and the sprite grows particles to match. Traits are purely
+    cosmetic: they never touch XP or levels.</p>
+  <div class="rules" id="rules"></div>
+  <div class="egrid" id="egrid"></div>
+
   <footer>
     <div><b>Fuel:</b> real token usage per turn · <b>Detection:</b> reads the live transcript for the active agent</div>
     <div>Egg → Rookie → Champion → … → Sovereign → Celestial → Aeon (Lv.750 ceiling)</div>
@@ -253,10 +349,10 @@ function domColor(frame, palette){
   for(const c in tally){ if(tally[c]>n){n=tally[c];best=c;} }
   return best;
 }
-function drawSprite(canvas, frame, palette){
+function drawSprite(canvas, frame, palette, size=128){
   const rows = frame.length, cols = frame[0].length;
   const dpr = Math.max(1, Math.min(3, window.devicePixelRatio||1));
-  const px = Math.round(128 / Math.max(rows, cols));
+  const px = Math.round(size / Math.max(rows, cols));
   const W = cols*px, H = rows*px;
   canvas.style.width = W+"px"; canvas.style.height = H+"px";
   canvas.width = W*dpr; canvas.height = H*dpr;
@@ -328,6 +424,50 @@ DATA.stages.forEach((s, i) => {
                glow:card.querySelector(".glow"), badge:card.querySelector(".badge") });
 });
 
+// ---------- elements (frames pre-dressed by digimon_elements.dress) ----------
+const R = DATA.rules;
+const ELEMENT_COLORS = Object.assign({}, ...DATA.elements.map(e => e.colors));
+const elByKey = Object.fromEntries(DATA.elements.map(e => [e.key, e]));
+const neutral = elByKey[R.neutral];
+const astral = DATA.elements[0];
+document.getElementById("rules").innerHTML = [
+  ["One trait per evolution",
+   `Each evolution banks one trait: the element fed most during the stage it is leaving. Real project work always outvotes ${neutral.emoji} ${neutral.name}.`],
+  ["You can choose",
+   `<code>digimon_cli.py attune &lt;element&gt;</code> picks the next trait instead of "fed most". It is used up on that evolution; <code>attune off</code> cancels.`],
+  [`${R.attuned_at} of one = attuned`,
+   `Particles grow ${R.primary.slice(1).join(" → ")} per trait. At ${R.attuned_at} the outline turns the element's colour and the epithet upgrades (${astral.epithet} → ${astral.attuned_epithet}). A second element adds a smaller scatter.`],
+  ["Rebirth inherits",
+   `At the Lv.750 rebirth the new Egg starts with one trait: the life's strongest element (most traits; a tie goes to the most recent).`],
+].map(([t,d]) => `<div class="rulecard"><div class="rt">${t}</div><div class="rd">${d}</div></div>`).join("");
+
+const ECELLS = [];
+const egrid = document.getElementById("egrid");
+for(const e of DATA.elements){
+  const card = document.createElement("div");
+  card.className = "ecard";
+  const cols = Object.values(e.colors);
+  card.style.setProperty("--accent", cols[0]);
+  const feeds = e.match.length
+    ? e.match.map(m => `<code>${m}</code>`).join(" ")
+    : "anything else (the workspace root, a stray folder)";
+  card.innerHTML = `
+    <div class="ehead"><span class="eemoji">${e.emoji}</span><span class="ename">${e.name}</span>
+      <span class="swatches">${cols.map(c => `<i style="background:${c}"></i>`).join("")}</span></div>
+    <div class="epi">${e.epithet} → <b>${e.attuned_epithet}</b> at ×${R.attuned_at}</div>
+    <div class="feeds">Fed by ${feeds}</div>
+    <div class="blurb">${e.blurb}</div>
+    ${e.rows.map(r => `<div class="erow"><div class="rl">${r.stage}</div><div class="ecells">
+      ${r.cells.map(c => `<div class="ecell${c.n >= R.attuned_at ? " attuned" : ""}">
+        <canvas title="${c.title}" aria-label="${c.title}, ${c.n} ${e.name} trait${c.n>1?"s":""}"></canvas>
+        <span class="n">×${c.n}${c.n >= R.attuned_at ? " attuned" : ""}</span></div>`).join("")}
+    </div></div>`).join("")}`;
+  egrid.appendChild(card);
+  const canvases = card.querySelectorAll("canvas");
+  let i = 0;
+  for(const r of e.rows) for(const c of r.cells) ECELLS.push({frames:c.frames, canvas:canvases[i++]});
+}
+
 let palNow = DATA.palette, frameNow = -1;
 function paintAll(frame){
   for(const c of CARDS){
@@ -338,6 +478,10 @@ function paintAll(frame){
     c.glow.style.background = accent;
     c.badge.style.background = accent;
   }
+  // Element colours sit on top of the shiny rotation, as in dress(): Forge stays
+  // orange in every rebirth life.
+  const epal = Object.assign({}, palNow, ELEMENT_COLORS);
+  for(const c of ECELLS) drawSprite(c.canvas, c.frames[frame % c.frames.length], epal, 64);
 }
 
 // ---------- animated status-bar demo ----------
@@ -431,6 +575,8 @@ loop();
 
 OUT.write_text(HTML.replace("__DATA__", payload))
 print("wrote", OUT, OUT.stat().st_size, "bytes")
+print("elements:", len(slim["elements"]), "× stages", SHOWCASE_STAGES,
+      "× traits", list(SHOWCASE_COUNTS))
 print("stages:", len(slim["stages"]),
       "· frames/stage:", len(slim["stages"][0]["sprite"]),
       "· sprite size:", len(slim["stages"][0]["sprite"][0]), "x",
